@@ -8,11 +8,11 @@ Requires the following python packages (available through pip):
 * [pytorch](https://pytorch.org/) v1.0.0
 
 To recreate the POS tags for the vocab you need:
-  [spaCy](https://spacy.io) v2.2.4
+*  [spaCy](https://spacy.io) v2.2.4
 
 From spaCy you need the pretrained English model "en_core_web_sm":
 
-  python -m spacy download en_core_web_sm
+    python -m spacy download en_core_web_sm
 
 
 ### Quick Usage
