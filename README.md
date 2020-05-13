@@ -53,10 +53,7 @@ the training corpora. Including:
 The stimuli directory houses excel files with the data in the experiment. 
 
 To run norm.py with non-default settings:
-
-    usage: norm.py [-h] [--models MODELS] [--stim_file STIM_FILE]
-                   [--output_file OUTPUT_FILE] [--file_type FILE_TYPE]
-                  
+                
     usage: norm.py [-h] [--models MODELS] [--stim_file STIM_FILE]
                [--output_file OUTPUT_FILE] [--file_type FILE_TYPE]
 
