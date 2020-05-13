@@ -56,6 +56,21 @@ To run norm.py with non-default settings:
 
     usage: norm.py [-h] [--models MODELS] [--stim_file STIM_FILE]
                    [--output_file OUTPUT_FILE] [--file_type FILE_TYPE]
+                  
+    usage: norm.py [-h] [--models MODELS] [--stim_file STIM_FILE]
+               [--output_file OUTPUT_FILE] [--file_type FILE_TYPE]
+
+    Experiment Stimuli Norming for LSTM Language Model Probing
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      --models MODELS       model to run [a|b|c|d|e|all]
+      --stim_file STIM_FILE
+                            path to stimuli file
+      --output_file OUTPUT_FILE
+                            Ouput file name: default is normed_[stim_file_name]
+      --file_type FILE_TYPE
+                            File type for output: [xlsx|csv|both]
 
 Example run:
         norm.py --models all --stim_file stimuli/stim.xlsx --file_type xlsx
