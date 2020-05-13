@@ -5,332 +5,301 @@
 #Expects a xlsx file with no header that has 
 #two columns with sentences
 #Outputs xlsx with information about UNKs, 
-#surprisal, entropy, and frequency
+#surprisal, and entropy
 #############################################
 import re
 import pandas as pd
+import numpy as np
+
+DETS = {'the', 'a', 'her', 'his', 'their', 'this', 'that', 
+        'its'}
 
 class Stim:
 
-    def __init__(self, sent_file):
+    def __init__(self, sent_file, vocab_f='models/vocab'):
 
+        #Read in stimuli
         self.EXP = read_stim_file(sent_file)
+        #Read in vocab
+        self.model_vocab = self.load_vocab(vocab_f)
+        #Pairs of sentences
+        self.SENTS = []
+        #Target words for pairs
+        self.TARGET_WORDS = []
+        #Target indices for pairs
+        self.TARGET_IDX = []
+        #Has Unk list
+        self.hasUNK = []
+        #UNK'd sentences
+        self.UNK_SENTS = []
+        
+        #Extract target info
+        self.load_stim()
+
+        self.VERB_ENTROPY = {}
+        self.VERB_REDUCED_ENTROPY = {}
+        self.VERB_SURP = {}
+        self.NOUN_SURP = {}
+        self.dataframe = None
+
+    def save_excel(self, fname):
+
+        fname = fname.split('.')[0]+'.xlsx'
+
+        if self.dataframe is None:
+            self.create_df()
+
+        self.dataframe.to_excel(fname, index=False)
+
+    def save_csv(self, fname):
+        fname = fname.split('.')[0]+'.csv'
+
+        if self.dataframe is None:
+            self.create_df()
+
+        self.dataframe.to_csv(fname, index=False)
 
 
-    def load_RSA(self, sim_scores, modelf):
+    #God this is so gross :(
+    def create_df(self):
 
-        if modelf not in self.RSA:
-            self.RSA[modelf] = 0 
-        if modelf not in self.RSA1:
-            self.RSA1[modelf] = 0 
-        self.RSA[modelf] = sim_scores[0]
-        self.RSA1[modelf] = sim_scores[1]
+        SENT1 = list(map(lambda x: x[0], self.SENTS))
+        SENT2 = list(map(lambda x: x[1], self.SENTS))
 
-    #Break into target-context and seperate punctuation
-    def load_stim(self, sent_targs, dataType):
+        UNK_SENT1 = list(map(lambda x: x[0], self.UNK_SENTS))
+        UNK_SENT2 = list(map(lambda x: x[1], self.UNK_SENTS))
 
-        #Formatting for passive experiment
-        if dataType.lower() == 'passive':
-            self.MinTarget = ''
-            self.MinVerb = ''
+        hasUNK1 = list(map(lambda x: x[0], self.hasUNK))
+        hasUNK2 = list(map(lambda x: x[1], self.hasUNK))
 
-            self.SubTarget = ''
-            self.SubVerb = ''
+        MODELS1 = []
+        MODELS2 = []
+        names1 = []
+        names2 = []
+        possible_names1 = ['VERB1_ENTROPY', 'VERB1_REDUCTION', 'VERB1_SURP',
+                'NOUN1_SURP']
+        possible_names2 = ['VERB2_ENTROPY', 'VERB2_REDUCTION', 'VERB2_SURP',
+                'NOUN2_SURP']
 
-            for x in range(len(sent_targs)):
+        VERBS_ENT1 = []
+        VERBS_ENT1_names = []
+        VERBS_ENT2 = []
+        VERBS_ENT2_names = []
 
-                sent = sent_targs[x]
+        num_models = len(self.VERB_ENTROPY.keys())
+        num_obs = len(SENT1)
 
-                verb = []
+        #info X models X obs
+        table = np.empty((len(possible_names1)*2,num_models, num_obs), dtype=np.float64)
+        labels = np.empty((len(possible_names1)*2,num_models), dtype=object)
 
-                #Get verb (sluggish but ~shrug~) gets particles
-                prev_word = ''
-                isVerb = 0
+        y = 0
+        for model in self.VERB_ENTROPY:
 
-                for word in sent.split(' '):
-                    if prev_word == 'be':
-                        verb.append(word)
-                        isVerb = 1
-                    elif isVerb:
-                        if word == 'the' or word == 'his' or word == 'her' or word == "its":
-                            break
-                        verb.append(word)
-                    prev_word = word
+            #populate table
+            table[0,y,:] = list(map(lambda x: x[0], self.VERB_ENTROPY[model]))
+            table[1,y,:] = list(map(lambda x: x[1], self.VERB_ENTROPY[model]))
+            table[2,y,:] = list(map(lambda x: x[0], self.VERB_REDUCED_ENTROPY[model]))
+            table[3,y,:] = list(map(lambda x: x[1], self.VERB_REDUCED_ENTROPY[model]))
+            table[4,y,:] = list(map(lambda x: x[0], self.VERB_SURP[model]))
+            table[5,y,:] = list(map(lambda x: x[1], self.VERB_SURP[model]))
+            table[6,y,:] = list(map(lambda x: x[0], self.NOUN_SURP[model]))
+            table[7,y,:] = list(map(lambda x: x[1], self.NOUN_SURP[model]))
+
+            x = 0
+            #populate labels
+            for z in range(len(possible_names1)):
+                name1 = possible_names1[z]
+                name2 = possible_names2[z]
+                labels[x,y] = name1 + '_'+model.split('/')[-1]
+                x += 1
+                labels[x,y] = name2 + '_' + model.split('/')[-1]
+                x += 1
+
+            y += 1
+
+        #get avgs 
+        avgs = np.empty((len(possible_names1)*2, num_obs), dtype=np.float64)
+        avg_labels = []
+        for x in range(avgs.shape[0]):
+            for z in range(table.shape[-1]):
+                avgs[x, z] = sum(table[x,:,z])/len(table[x,:,z])
+
+
+        #Get avg_labels
+        for z in range(len(possible_names1)):
+            name1 = possible_names1[z]
+            name2 = possible_names2[z]
+            avg_labels.append(name1+'_AVG')
+            avg_labels.append(name2+'_AVG')
+
+        header = ['SENT1', 'UNK_SENT1', 'hasUNK1']
+
+        for x in range(labels.shape[0]):
+            if x%2 == 0:
+                header += labels[x,:].tolist()
+                header.append(avg_labels[x])
+
+        header += ['SENT2', 'UNK_SENT2', 'hasUNK2']
+        for x in range(labels.shape[0]):
+            if x%2 == 1:
+                header += labels[x,:].tolist()
+                header.append(avg_labels[x])
+
+        data = []
+        for x in range(len(SENT1)):
+            d = [SENT1[x], UNK_SENT1[x], hasUNK1[x]]
+            for y in range(table.shape[0]):
+                if y%2 == 0:
+                    d += table[y,:,x].tolist()
+                    d.append(avgs[y, x])
+            d += [SENT2[x], UNK_SENT2[x], hasUNK2[x]]
+            for y in range(table.shape[0]):
+                if y%2 != 0:
+                    d += table[y,:,x].tolist()
+                    d.append(avgs[y, x])
+            data.append(d)
+
+        self.dataframe = pd.DataFrame(data, columns = header) 
+
+
+    def load_IT(self, model_name, target_idx, values):
+        target_words = self.TARGET_WORDS[target_idx]
+        target_idxs = self.TARGET_IDX[target_idx]
+
+        verb_ent = []
+        verb_red = []
+        verb_surp = []
+        noun_surp = []
+        for sent_idx in range(len(target_words)):
+            sent_words = target_words[sent_idx]
+            sent_idxs = target_idxs[sent_idx]
+            IT_info = values[sent_idx]
+            for x in range(len(sent_words)):
+                t_word = sent_words[x]
+                t_idxs = sent_idxs[x]
+
+                IT_word = IT_info[t_idxs][0]
+                IT_surp = IT_info[t_idxs][1]
+                IT_entropy = IT_info[t_idxs+1][2]
+                IT_red = IT_info[t_idxs][2]-IT_entropy
+
+                assert (t_word == IT_word or IT_word == '<unk>')
 
                 if x == 0:
-                    self.MinTarget = sent
-                    self.MinVerb = ' '.join(verb)
+                    verb_ent.append(IT_entropy)
+                    verb_red.append(IT_red)
+                    verb_surp.append(IT_surp)
                 else:
-                    self.SubTarget = sent
-                    self.SubVerb = ' '.join(verb)
+                    noun_surp.append(IT_surp)
 
-            self.vocab.update(self.MinTarget.split(' '))
-            self.vocab.update(self.SubTarget.split(' '))
+        if model_name not in self.VERB_ENTROPY:
+            self.VERB_ENTROPY[model_name] = []
+        if model_name not in self.VERB_REDUCED_ENTROPY:
+            self.VERB_REDUCED_ENTROPY[model_name] = []
+        if model_name not in self.VERB_SURP:
+            self.VERB_SURP[model_name] = []
+        if model_name not in self.NOUN_SURP:
+            self.NOUN_SURP[model_name] = []
 
-        #format for original experiment
-        if dataType.lower() == 'full':
-            self.MinTarget = ''
-            self.MinFuture = ''
-            self.MinVerb = ''
+        assert verb_ent != []
 
-            self.SubTarget = ''
-            self.SubFuture = ''
-            self.SubVerb = ''
+        self.VERB_ENTROPY[model_name].append(verb_ent)
+        self.VERB_REDUCED_ENTROPY[model_name].append(verb_red)
+        self.VERB_SURP[model_name].append(verb_surp)
+        self.NOUN_SURP[model_name].append(noun_surp)
 
-            for x in range(len(sent_targs)):
-                sent_targ = sent_targs[x] 
-                sent_targ = sent_targ.strip().split('.')
-                sent = sent_targ[0].lower() + ' .'
-                sent2 = sent_targ[1].lower() + ' .'
-                verb = []
+    def load_vocab(self, vocab):
 
-                #Get verb (sluggish but ~shrug~) gets particles
-                prev_word = ''
-                isVerb = 0
-                for word in sent.split(' '):
-                    if prev_word == 'will':
-                        verb.append(word)
-                        isVerb = 1
-                    elif isVerb:
-                        if word == 'the' or word == 'his' or word == 'her' or word == "its":
-                            break
-                        verb.append(word)
-                    prev_word = word
-                
-                if x == 0:
-                    self.MinTarget = sent.strip()
-                    self.MinFuture = sent2.strip()
-                    self.MinVerb = ' '.join(verb)
+        #load vocab
+        info = set([])
+        vocab = open(vocab, 'r')
+        for line in vocab:
+            line = line.strip()
+            info.add(line)
+        vocab.close()
+        vocab = info
+        return vocab
+
+    #Extract from EXP targets words and indices
+    def load_stim(self):
+
+        SENT1 = self.EXP[0]
+        SENT2 = self.EXP[1]
+
+        #For each pair
+        for x in range(len(SENT1)):
+            sent1 = SENT1[x].lower().strip()
+            sent2 = SENT2[x].lower().strip()
+
+            self.SENTS.append((sent1+' .', sent2+' .'))
+
+            sent1 = sent1.split()
+            sent2 = sent2.split()
+
+            target_words = []
+            target_idx = []
+            has_unk = [0, 0]
+            #find verb, object
+            prev_word = ''
+            t_words = []
+            t_idx = [] 
+            unk_sent1 = []
+            for x in range(len(sent1)):
+                word = sent1[x]
+                if x > 1:
+                    if word in DETS:
+                        t_words.append(prev_word)
+                        t_idx.append(x-1)
+                    if prev_word in DETS:
+                        t_words.append(word)
+                        t_idx.append(x)
+
+                #check for unks
+                if word not in self.model_vocab:
+                    unk_sent1.append("<unk>")
+                    has_unk[0] = 1
                 else:
-                    self.SubTarget = sent.strip()
-                    self.SubFuture = sent2.strip()
-                    self.SubVerb = ' '.join(verb)
-            #update self.vocab
-            self.vocab.update(self.MinTarget.split(' '))
-            self.vocab.update(self.SubTarget.split(' '))
+                    unk_sent1.append(word)
 
-    def get_csv_header(self, flatten=False):
+                prev_word = word
 
-        if flatten:
-            header = 'ITEM,MODEL,COND,SENTENCE,RSA,RATED CHANGE,RATED IMAGEABILITY,BOLD\n'
-        else:
-            header = 'ITEM,MODEL,COND,SENTENCE,RSA,RATED CHANGE,RATED IMAGEABILITY,BOLD,COND,SENTENCE,RSA,CHANGE,RATED IMAGEABILITY,BOLD\n'
+            target_words.append(t_words)
+            target_idx.append(t_idx)
+            unk_sent1.append('.')
 
-        return header
+            #find verb, object
+            prev_word = ''
+            t_words = []
+            t_idx = [] 
+            unk_sent2 = []
+            for x in range(len(sent2)):
+                word = sent2[x]
+                if x > 1:
+                    if word in DETS:
+                        t_words.append(prev_word)
+                        t_idx.append(x-1)
+                    if prev_word in DETS:
+                        t_words.append(word)
+                        t_idx.append(x)
 
-    def get_csv_entry(self, flatten=False, avg=False):
-        out = ''
-        if avg:
-            RSA = str(sum(self.RSA.values())/len(self.RSA.values()))
-            RSA1 = str(sum(self.RSA1.values())/len(self.RSA1.values()))
-            BOLD = str(self.BOLD)
-            BOLD1 = str(self.BOLD1)
-            Rating = str(self.Rating)
-            Rating1 = str(self.Rating)
-            Image = str(self.Image)
-            Image1 = str(self.Image1)
-            Item = str(self.Item)
-            model = 'all'
-
-            first_half = ','.join([Item, model, self.Cond, 
-                self.MinTarget,RSA,Rating,Image,BOLD])
-            if flatten:
-                second_half = '\n'+','.join([Item, model, self.Cond1, 
-                    self.SubTarget, RSA1, Rating1, Image1, BOLD1])
-            else:
-                second_half = ","+','.join([self.Cond1, 
-                    self.SubTarget, RSA1,Rating1, Image1, BOLD1])
-            out += first_half+second_half + '\n'
-        else:
-            for model in self.RSA:
-                RSA = str(self.RSA[model])
-                RSA1 = str(self.RSA1[model])
-                BOLD = str(self.BOLD)
-                BOLD1 = str(self.BOLD1)
-                Rating = str(self.Rating)
-                Rating1 = str(self.Rating1)
-                Image = str(self.Image)
-                Image1 = str(self.Image1)
-                Item = str(self.Item)
-                model = model.split('/')[-1]
-
-                first_half = ','.join([Item, model, self.Cond, 
-                    self.MinTarget,RSA,Rating,Image,BOLD])
-                if flatten:
-                    second_half = '\n'+','.join([Item, model, self.Cond1, 
-                        self.SubTarget, RSA1, Rating1,Image1, BOLD1])
+                #check for unks
+                if word not in self.model_vocab:
+                    unk_sent2.append("<unk>")
+                    has_unk[1] = 1
                 else:
-                    second_half = ","+','.join([self.Cond1, 
-                        self.SubTarget, RSA1,Rating1, Image1,BOLD1])
-                out += first_half+second_half + '\n'
-        return out
+                    unk_sent2.append(word)
 
-    def get_multi_test_sents(self):
+                prev_word = word
 
-        #Awful I know, the point is to strip of the and then and the pronoun
-        MinFuture = ' '.join(self.MinFuture.split(' ')[3:])
-        SubFuture = ' '.join(self.SubFuture.split(' ')[3:])
+            target_words.append(t_words)
+            target_idx.append(t_idx)
+            unk_sent2.append('.')
 
-        #Get the subject of the target sentence
-        MinSubject = ' '.join(self.MinTarget.split(' ')[:2])
-        SubSubject = ' '.join(self.SubTarget.split(' ')[:2])
-
-        #Create sentence
-        Min = MinSubject + ' '+MinFuture + ' and then , '+self.MinTarget
-
-        Sub = SubSubject + ' '+SubFuture + ' and then , '+self.SubTarget
-
-        return [Min, Sub]
-
-    def get_test_sents(self):
-        MinNoun = []
-        inNoun = 0
-        count = 0
-        for word in self.MinTarget.split(' '):
-            count += 1
-            if count < 3:
-                continue
-            if word == '.':
-                continue
-            if word == 'the' or word == 'his' or word == 'her' or word == "its":
-                inNoun = 1
-                continue
-            if inNoun:
-                MinNoun.append(word)
-
-        SubNoun = []
-        count = 0
-        inNoun = 0
-        for word in self.SubTarget.split(' '):
-            count += 1
-            if count < 3:
-                continue
-            if word == '.':
-                continue
-            if word == 'the' or word == 'his' or word == 'her' or word == 'its':
-                inNoun = 1
-                continue
-            if inNoun:
-                SubNoun.append(word)
-
-        MinNoun = ' '.join(MinNoun)
-        SubNoun = ' '.join(SubNoun)
-        if MinNoun == SubNoun:
-            #comparer = "there is a "+MinNoun +' .'
-            comparer = MinNoun
-            self.MinNoun = MinNoun
-            self.SubNoun = MinNoun
-            return [self.MinTarget, self.SubTarget, comparer]
-        #MinComparer = "there is a "+MinNoun +' .'
-        #SubComparer = "there is a "+SubNoun + ' .'
-        MinComparer = MinNoun
-        SubComparer = SubNoun
-        self.MinNoun = MinNoun
-        self.SubNoun = SubNoun
-        return [self.MinTarget, self.SubTarget, MinComparer, SubComparer]
-
-
-    def check_for_unks(self, vocab):
-
-        #load vocab
-        info = set([])
-        vocab = open(vocab, 'r')
-        for line in vocab:
-            line = line.strip()
-            info.add(line)
-        vocab.close()
-        vocab = info
-
-        #Check if words in stimuli missing from vocab
-        if not self.vocab.issubset(vocab):
-            missing_words = self.vocab.difference(vocab)
-            return missing_words
-        return set([])
-
-    def filter_noun_freq(self, vocab):
-        #load vocab
-        info = set([])
-        vocab = open(vocab, 'r')
-        for line in vocab:
-            line = line.strip()
-            info.add(line)
-        vocab.close()
-        vocab = info
-
-        #get nouns
-        self.get_test_sents()
-
-        #Check if verb is in frequent list
-        if self.MinNoun not in vocab or self.SubNoun not in vocab:
-            self.hasREMOVE = 1
-
-        #Check if words in stimuli missing from vocab
-        return
-
-    def filter_verb_freq(self, vocab):
-        #load vocab
-        info = set([])
-        vocab = open(vocab, 'r')
-        for line in vocab:
-            line = line.strip()
-            info.add(line)
-        vocab.close()
-        vocab = info
-
-        #Check if verb is in frequent list
-        if self.MinVerb not in vocab or self.SubVerb not in vocab:
-            self.hasREMOVE = 1
-
-        #Check if words in stimuli missing from vocab
-        return
-
-    def filter_unks(self, vocab):
-        #load vocab
-        info = set([])
-        vocab = open(vocab, 'r')
-        for line in vocab:
-            line = line.strip()
-            info.add(line)
-        vocab.close()
-        vocab = info
-
-        #Check if words in stimuli missing from vocab
-        if not self.vocab.issubset(vocab):
-            self.hasREMOVE = 1
-        return
-
-    def replace_unks(self, SWAPS):
-
-        #check if words in stimuli are in swaps
-        unks = self.vocab.intersection(set(SWAPS.keys()))
-        if 'rubik' in self.MinTarget:
-            self.MinTarget = self.MinTarget.replace('rubik’s', '')
-            self.MinFuture = self.MinFuture.replace('rubik’s', '')
-            self.SubTarget = self.SubTarget.replace('rubik’s', '')
-            self.SubFuture = self.SubFuture.replace('rubik’s', '')
-
-            self.hasREMOVE = 1
-        if unks:
-            for unk in unks:
-                if SWAPS[unk] == 'REMOVE':
-
-                    self.hasREMOVE = 1
-
-                self.MinTarget = self.MinTarget.replace(unk, SWAPS[unk])
-                self.MinFuture = self.MinFuture.replace(unk, SWAPS[unk])
-                self.SubTarget = self.SubTarget.replace(unk, SWAPS[unk])
-                self.SubFuture = self.SubFuture.replace(unk, SWAPS[unk])
-                #Uncomment to remove all stimuli that 
-                #have any word not in vocab
-                self.hasREMOVE = 1
-
-
-        #Fix spacing issue :(
-        self.MinTarget = self.MinTarget.replace('  ', ' ')
-        self.MinFuture = self.MinFuture.replace('  ', ' ')
-        self.SubTarget = self.SubTarget.replace('  ', ' ')
-        self.SubFuture = self.SubFuture.replace('  ', ' ')
-        return
+            self.TARGET_WORDS.append(target_words)
+            self.TARGET_IDX.append(target_idx)
+            self.UNK_SENTS.append((' '.join(unk_sent1), ' '.join(unk_sent2)))
+            self.hasUNK.append(has_unk)
 
 #Read in stimuli files as pandas dataframe
 def read_stim_file(stim_file):
