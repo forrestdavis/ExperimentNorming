@@ -1,5 +1,3 @@
-import subprocess
-import stimuli
 import sys
 
 
@@ -14,7 +12,7 @@ files = ['vocab_info/A_word_freqs',
 for f in files:
     corpus = f.split('/')[1].split('_')[0]
     #freqs[corpus] = {}
-    with open(f, 'r', errors='ignore') as data:
+    with open(f, 'r', errors='replace') as data:
         for line in data:
             line = line.strip().split(' ')
             if len(line) != 2:
