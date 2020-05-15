@@ -29,7 +29,7 @@ stimuli file
 normed files are saved to results and can be formatted as an excel file or csv. The columns in this
 are:
 * SENT1 - First sentence as given in the stimuli file (lower-cased)
-* UNK_SENT1 - First sentence with any missing vocab as UNK (this is what the model sees)
+* UNK_SENT1 - First sentence with any missing vocab as \<unk\> (this is what the model sees)
 * hasUNK1 - Boolean that is 0 if all words are in vocabulary, 1 otherwise
 * VERB1_ENTROPY_[MODEL] - Entropy after the verb for the MODEL (one column per model)
 * VERB1_ENTROPY_AVG - Average entropy after the verb across tested models
@@ -38,7 +38,7 @@ are:
 * VERB1_SURP_[MODEL] - Surprisal at the verb for the MODEL (one column per model)
 * VERB1_SURP_AVG - Average surprisal at the verb across tested models
 * NOUN1_SURP_[MODEL] - Surprisal at the noun for the MODEL (one column per model)
-* NOUN1_SURP_AVG - Average xurprisal at the noun across tested models
+* NOUN1_SURP_AVG - Average surprisal at the noun across tested models
 
 Same thing repeats but for the second sentence and the flag is SENT2, VERB2, etc.
 
