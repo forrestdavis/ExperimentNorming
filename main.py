@@ -132,7 +132,7 @@ def find_det_nouns(metrics):
         print(context_det, context_noun)
         print(target_det, target_noun)
 
-def run_norming(stim_file, vocab_file, model_files, verbose=False):
+def run_norming(stim_file, vocab_file, model_files, header=False, verbose=False):
     ''' Given a stimuli file, model vocabulary file and model files
     return information about frequency and information
     theoretic measures'''
@@ -147,7 +147,7 @@ def run_norming(stim_file, vocab_file, model_files, verbose=False):
     #Load experiments
     #__iter__ is over pairs of Min and Sub verbs
     #includes RSA results by model (ie by participant)
-    EXP = data.Stim(stim_file)
+    EXP = data.Stim(stim_file, header)
 
     #Loop through the models
     for model_file in model_files:
@@ -181,22 +181,8 @@ def run_norming(stim_file, vocab_file, model_files, verbose=False):
 
     return EXP
 
-
-def save(EXP_f, EXP, flatten=False, avg=False):
-
-    #### write to output file
-    out_file = open(EXP_f, 'w')
-    out_file.write(EXP[0].get_csv_header(flatten))
-
-    for stim_pair in EXP:
-        #skip those skipped in testing
-        if stim_pair.hasREMOVE:
-            continue
-        out_file.write(stim_pair.get_csv_entry(flatten, avg))
-    out_file.close()
-
 '''
-stim_file = 'stimuli/The_boy_will_bounce_the_ball.xlsx'
+stim_file = 'stimuli/header.xlsx'
 vocab_file = 'models/vocab'
 model_files = glob.glob('models/*.pt')[:1]
 
@@ -204,5 +190,4 @@ EXP = run_norming(stim_file, vocab_file, model_files, True)
 
 EXP.save_excel('normed_'+stim_file.split('/')[-1])
 EXP.save_csv('normed_'+stim_file.split('/')[-1])
-
 '''

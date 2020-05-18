@@ -10,6 +10,9 @@ parser.add_argument('--stim_file', type=str,
         default='stimuli/The_boy_will_bounce_the_ball.xlsx', 
         help='path to stimuli file')
 
+parser.add_argument('--has_header', action='store_true',
+                    help='Specify if the excel file has a header')
+
 parser.add_argument('--output_file', type=str, 
         default='', 
         help='Ouput file name: default is normed_[stim_file_name]')
@@ -48,7 +51,7 @@ elif args.models == 'e':
 vocab_file = 'models/vocab'
 
 #Run experiment
-EXP = run_norming(args.stim_file, vocab_file, model_files, True)
+EXP = run_norming(args.stim_file, vocab_file, model_files, args.has_header, True)
 
 if args.output_file is '':
     output_file = 'results/normed_'+args.stim_file.split('/')[-1]

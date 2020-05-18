@@ -24,7 +24,7 @@ To run norming on stimuli:
 
 ### Information on Files
 stimuli file
-* expecting two unlabeled columns with the sentences of the form DET NOUN will VERB (PARTICLE) DET NOUN 
+* expecting one or two columns with an optional header with the sentences of the form DET NOUN will VERB (PARTICLE) DET NOUN 
 
 normed files are saved to results and can be formatted as an excel file or csv. The columns in this
 are:
@@ -54,8 +54,8 @@ The stimuli directory houses excel files with the data in the experiment.
 
 To run norm.py with non-default settings:
                 
-    usage: norm.py [-h] [--models MODELS] [--stim_file STIM_FILE]
-               [--output_file OUTPUT_FILE] [--file_type FILE_TYPE]
+    usage: norm.py [-h] [--models MODELS] [--stim_file STIM_FILE] [--has_header]
+                   [--output_file OUTPUT_FILE] [--file_type FILE_TYPE]
 
     Experiment Stimuli Norming for LSTM Language Model Probing
 
@@ -64,16 +64,18 @@ To run norm.py with non-default settings:
       --models MODELS       model to run [a|b|c|d|e|all]
       --stim_file STIM_FILE
                             path to stimuli file
+      --has_header          Specify if the excel file has a header
       --output_file OUTPUT_FILE
                             Ouput file name: default is normed_[stim_file_name]
       --file_type FILE_TYPE
                             File type for output: [xlsx|csv|both]
 
 Example run:
-        norm.py --models all --stim_file stimuli/stim.xlsx --file_type xlsx
+        norm.py --models all --stim_file stimuli/stim.xlsx --file_type xlsx --has_header
 
-This will look for a stimuli file called stim.xlsx and output the stimuli 
-RNN LM measures in an excel file in results called normed_stim.xlsx.
+This will look for a stimuli file called stim.xlsx that will have a header
+and output the stimuli RNN LM measures in an excel file 
+in results called normed_stim.xlsx.
 
 To recreate the frequency count information in vocab_info, you need 
 the training corpora for the models. Unfortunately, they
