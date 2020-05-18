@@ -16,10 +16,10 @@ DETS = {'the', 'a', 'her', 'his', 'their', 'this', 'that',
 
 class Stim:
 
-    def __init__(self, sent_file, vocab_f='models/vocab'):
+    def __init__(self, sent_file, hasHeader=False, vocab_f='models/vocab'):
 
         #Read in stimuli
-        self.EXP = read_stim_file(sent_file)
+        self.EXP, self.header = read_stim_file(sent_file, hasHeader)
         #Read in vocab
         self.model_vocab = self.load_vocab(vocab_f)
         #Pairs of sentences
@@ -224,8 +224,12 @@ class Stim:
     #Extract from EXP targets words and indices
     def load_stim(self):
 
-        SENT1 = self.EXP[0]
-        SENT2 = self.EXP[1]
+        if len(self.header) == 1:
+            SENT1 = self.EXP[self.header[0]]
+            SENT2 = []
+        if len(self.header) == 2:
+            SENT1 = self.EXP[self.header[0]]
+            SENT2 = self.EXP[self.header[1]]
 
         #For each pair
         for x in range(len(SENT1)):
@@ -302,14 +306,20 @@ class Stim:
             self.hasUNK.append(has_unk)
 
 #Read in stimuli files as pandas dataframe
-def read_stim_file(stim_file):
+def read_stim_file(stim_file, hasHeader=False):
 
-    EXP = pd.read_excel(stim_file, header=None)
+    if hasHeader:
+        EXP = pd.read_excel(stim_file)
+    else:
+        EXP = pd.read_excel(stim_file, header=None)
 
-    return EXP 
+    header = EXP.columns.values
+
+    return EXP, header
 
 if __name__ == "__main__":
 
-    stimf = 'stimuli/The_boy_will_bounce_the_ball.xlsx'
+    #stimf = 'stimuli/The_boy_will_bounce_the_ball.xlsx'
+    stimf = 'stimuli/single_column.xlsx'
     EXP = Stim(stimf)
 
