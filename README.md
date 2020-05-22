@@ -40,7 +40,8 @@ are:
 * NOUN1_SURP_[MODEL] - Surprisal at the noun for the MODEL (one column per model)
 * NOUN1_SURP_AVG - Average surprisal at the noun across tested models
 
-Same thing repeats but for the second sentence and the flag is SENT2, VERB2, etc.
+Same thing repeats but for the second sentence and the flag is SENT2, VERB2, etc 
+if there is a second column.
 
 The directory vocab_info includes information about the frequency of words in 
 the training corpora. Including: 
