@@ -1,3 +1,5 @@
 - parse data
 - get counts from parses
 - add flags for stimuli file types: yanina
+- add multi-sent capability
+- get entropy at nouns
