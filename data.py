@@ -233,9 +233,13 @@ class Stim:
             self.dataframe = pd.DataFrame(data, columns = header) 
 
 
-    def load_IT(self, model_name, target_idx, values):
+    def load_IT(self, model_name, target_idx, values, multisent_flag=False):
+        
         target_words = self.TARGET_WORDS[target_idx]
         target_idxs = self.TARGET_IDX[target_idx]
+
+        if multisent_flag:
+            print(target_words, target_idxs)
 
         verb_ent = []
         verb_red = []
@@ -301,6 +305,7 @@ class Stim:
             #For each pair
             for x in range(len(SENT1)):
                 sent1 = SENT1[x].lower().strip()
+                sent1 = sent1.replace(',', ' ,').replace('.', '')
 
                 self.SENTS.append((sent1+' .',))
 
@@ -351,6 +356,9 @@ class Stim:
             for x in range(len(SENT1)):
                 sent1 = SENT1[x].lower().strip()
                 sent2 = SENT2[x].lower().strip()
+
+                sent1 = sent1.replace(',', ' ,').replace('.', '')
+                sent2 = sent2.replace(',', ' ,').replace('.', '')
 
                 self.SENTS.append((sent1+' .', sent2+' .'))
 
@@ -436,6 +444,6 @@ def read_stim_file(stim_file, hasHeader=False):
 if __name__ == "__main__":
 
     #stimf = 'stimuli/The_boy_will_bounce_the_ball.xlsx'
-    stimf = 'stimuli/header.xlsx'
+    stimf = 'stimuli/multi_sent.xlsx'
     EXP = Stim(stimf, True)
 

@@ -132,7 +132,8 @@ def find_det_nouns(metrics):
         print(context_det, context_noun)
         print(target_det, target_noun)
 
-def run_norming(stim_file, vocab_file, model_files, header=False, verbose=False):
+def run_norming(stim_file, vocab_file, model_files, header=False, 
+        multisent_flag = False, verbose=False):
     ''' Given a stimuli file, model vocabulary file and model files
     return information about frequency and information
     theoretic measures'''
@@ -164,9 +165,6 @@ def run_norming(stim_file, vocab_file, model_files, header=False, verbose=False)
                 model = model.module
             model.rnn.flatten_parameters()
 
-        #Set to single sentence reading
-        multisent_flag = False
-
         #loop through experimental items for EXP
         for x in range(len(EXP.UNK_SENTS)):
             sentences = list(EXP.UNK_SENTS[x])
@@ -176,18 +174,24 @@ def run_norming(stim_file, vocab_file, model_files, header=False, verbose=False)
                     sentences, multisent_flag)
             #Get one hots
             sent_ids = corpus.get_data()
+            print(sentences)
+            print(sent_ids)
+
             values = test_IT(sent_ids, corpus, model)
-            EXP.load_IT(model_file, x, values)
+            print(values)
+
+            EXP.load_IT(model_file, x, values, multisent_flag)
+            break
 
     return EXP
 
-'''
-stim_file = 'stimuli/header.xlsx'
+stim_file = 'stimuli/multi_sent.xlsx'
 vocab_file = 'models/vocab'
 model_files = glob.glob('models/*.pt')[:1]
 
-EXP = run_norming(stim_file, vocab_file, model_files, True)
+EXP = run_norming(stim_file, vocab_file, model_files, True, True, True)
 
+'''
 EXP.save_excel('normed_'+stim_file.split('/')[-1])
 EXP.save_csv('normed_'+stim_file.split('/')[-1])
 '''
