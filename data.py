@@ -40,6 +40,7 @@ class Stim:
         self.VERB_REDUCED_ENTROPY = {}
         self.VERB_SURP = {}
         self.NOUN_SURP = {}
+        self.NOUN_ENTROPY = {}
         self.dataframe = None
 
     def save_excel(self, fname):
@@ -73,10 +74,7 @@ class Stim:
             MODELS1 = []
             names1 = []
             possible_names1 = ['VERB1_ENTROPY', 'VERB1_REDUCTION', 'VERB1_SURP',
-                    'NOUN1_SURP']
-
-            VERBS_ENT1 = []
-            VERBS_ENT1_names = []
+                    'NOUN1_ENTROPY', 'NOUN1_SURP']
 
             num_models = len(self.VERB_ENTROPY.keys())
             num_obs = len(SENT1)
@@ -92,7 +90,8 @@ class Stim:
                 table[0,y,:] = list(map(lambda x: x[0], self.VERB_ENTROPY[model]))
                 table[1,y,:] = list(map(lambda x: x[0], self.VERB_REDUCED_ENTROPY[model]))
                 table[2,y,:] = list(map(lambda x: x[0], self.VERB_SURP[model]))
-                table[3,y,:] = list(map(lambda x: x[0], self.NOUN_SURP[model]))
+                table[3,y,:] = list(map(lambda x: x[0], self.NOUN_ENTROPY[model]))
+                table[4,y,:] = list(map(lambda x: x[0], self.NOUN_SURP[model]))
 
                 x = 0
                 #populate labels
@@ -147,14 +146,9 @@ class Stim:
             names1 = []
             names2 = []
             possible_names1 = ['VERB1_ENTROPY', 'VERB1_REDUCTION', 'VERB1_SURP',
-                    'NOUN1_SURP']
+                    'NOUN1_ENTROPY', 'NOUN1_SURP']
             possible_names2 = ['VERB2_ENTROPY', 'VERB2_REDUCTION', 'VERB2_SURP',
-                    'NOUN2_SURP']
-
-            VERBS_ENT1 = []
-            VERBS_ENT1_names = []
-            VERBS_ENT2 = []
-            VERBS_ENT2_names = []
+                    'NOUN2_ENTROPY', 'NOUN2_SURP']
 
             num_models = len(self.VERB_ENTROPY.keys())
             num_obs = len(SENT1)
@@ -173,8 +167,10 @@ class Stim:
                 table[3,y,:] = list(map(lambda x: x[1], self.VERB_REDUCED_ENTROPY[model]))
                 table[4,y,:] = list(map(lambda x: x[0], self.VERB_SURP[model]))
                 table[5,y,:] = list(map(lambda x: x[1], self.VERB_SURP[model]))
-                table[6,y,:] = list(map(lambda x: x[0], self.NOUN_SURP[model]))
-                table[7,y,:] = list(map(lambda x: x[1], self.NOUN_SURP[model]))
+                table[6,y,:] = list(map(lambda x: x[0], self.NOUN_ENTROPY[model]))
+                table[7,y,:] = list(map(lambda x: x[1], self.NOUN_ENTROPY[model]))
+                table[8,y,:] = list(map(lambda x: x[0], self.NOUN_SURP[model]))
+                table[9,y,:] = list(map(lambda x: x[1], self.NOUN_SURP[model]))
 
                 x = 0
                 #populate labels
@@ -238,12 +234,28 @@ class Stim:
         target_words = self.TARGET_WORDS[target_idx]
         target_idxs = self.TARGET_IDX[target_idx]
 
+        #split values into seperate sentences
         if multisent_flag:
-            print(target_words, target_idxs)
+            values = values[0]
+            values1 = []
+            values2 = []
+            inOne = 1
+            inTwo = 0
+            for v in values:
+                if inOne:
+                    values1.append(v)
+                if inTwo:
+                    values2.append(v)
+                if inOne and v[0] == '.':
+                    inOne = 0
+                    inTwo = 1
+                
+            values = [values1, values2]
 
         verb_ent = []
         verb_red = []
         verb_surp = []
+        noun_entropy = []
         noun_surp = []
         for sent_idx in range(len(target_words)):
             sent_words = target_words[sent_idx]
@@ -266,6 +278,7 @@ class Stim:
                     verb_surp.append(IT_surp)
                 else:
                     noun_surp.append(IT_surp)
+                    noun_entropy.append(IT_entropy)
 
         if model_name not in self.VERB_ENTROPY:
             self.VERB_ENTROPY[model_name] = []
@@ -275,6 +288,8 @@ class Stim:
             self.VERB_SURP[model_name] = []
         if model_name not in self.NOUN_SURP:
             self.NOUN_SURP[model_name] = []
+        if model_name not in self.NOUN_ENTROPY:
+            self.NOUN_ENTROPY[model_name] = []
 
         assert verb_ent != []
 
@@ -282,6 +297,7 @@ class Stim:
         self.VERB_REDUCED_ENTROPY[model_name].append(verb_red)
         self.VERB_SURP[model_name].append(verb_surp)
         self.NOUN_SURP[model_name].append(noun_surp)
+        self.NOUN_ENTROPY[model_name].append(noun_entropy)
 
     def load_vocab(self, vocab):
 
@@ -305,9 +321,9 @@ class Stim:
             #For each pair
             for x in range(len(SENT1)):
                 sent1 = SENT1[x].lower().strip()
-                sent1 = sent1.replace(',', ' ,').replace('.', '')
+                sent1 = sent1.replace(',', ' ,').replace('.', '') + ' .'
 
-                self.SENTS.append((sent1+' .',))
+                self.SENTS.append((sent1,))
 
                 sent1 = sent1.split()
 
@@ -325,9 +341,9 @@ class Stim:
                         if word in DETS:
                             t_words.append(prev_word)
                             t_idx.append(x-1)
-                        if prev_word in DETS:
-                            t_words.append(word)
-                            t_idx.append(x)
+                        if word == '.':
+                            t_words.append(prev_word)
+                            t_idx.append(x-1)
 
                     #check for unks
                     if word not in self.model_vocab:
@@ -340,7 +356,6 @@ class Stim:
 
                 target_words.append(t_words)
                 target_idx.append(t_idx)
-                unk_sent1.append('.')
 
                 self.TARGET_WORDS.append(target_words)
                 self.TARGET_IDX.append(target_idx)
@@ -357,10 +372,10 @@ class Stim:
                 sent1 = SENT1[x].lower().strip()
                 sent2 = SENT2[x].lower().strip()
 
-                sent1 = sent1.replace(',', ' ,').replace('.', '')
-                sent2 = sent2.replace(',', ' ,').replace('.', '')
+                sent1 = sent1.replace(',', ' ,').replace('.', '') + ' .'
+                sent2 = sent2.replace(',', ' ,').replace('.', '') + ' .'
 
-                self.SENTS.append((sent1+' .', sent2+' .'))
+                self.SENTS.append((sent1, sent2))
 
                 sent1 = sent1.split()
                 sent2 = sent2.split()
@@ -379,9 +394,9 @@ class Stim:
                         if word in DETS:
                             t_words.append(prev_word)
                             t_idx.append(x-1)
-                        if prev_word in DETS:
-                            t_words.append(word)
-                            t_idx.append(x)
+                        if word == '.':
+                            t_words.append(prev_word)
+                            t_idx.append(x-1)
 
                     #check for unks
                     if word not in self.model_vocab:
@@ -394,7 +409,6 @@ class Stim:
 
                 target_words.append(t_words)
                 target_idx.append(t_idx)
-                unk_sent1.append('.')
 
                 #find verb, object
                 prev_word = ''
@@ -407,9 +421,9 @@ class Stim:
                         if word in DETS:
                             t_words.append(prev_word)
                             t_idx.append(x-1)
-                        if prev_word in DETS:
-                            t_words.append(word)
-                            t_idx.append(x)
+                        if word == '.':
+                            t_words.append(prev_word)
+                            t_idx.append(x-1)
 
                     #check for unks
                     if word not in self.model_vocab:
@@ -422,7 +436,6 @@ class Stim:
 
                 target_words.append(t_words)
                 target_idx.append(t_idx)
-                unk_sent2.append('.')
 
                 self.TARGET_WORDS.append(target_words)
                 self.TARGET_IDX.append(target_idx)

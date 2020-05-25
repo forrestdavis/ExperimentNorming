@@ -13,6 +13,9 @@ parser.add_argument('--stim_file', type=str,
 parser.add_argument('--has_header', action='store_true',
                     help='Specify if the excel file has a header')
 
+parser.add_argument('--multi_sent', action='store_true',
+                    help='Specify if you are running multiple sentence stimuli.')
+
 parser.add_argument('--output_file', type=str, 
         default='', 
         help='Ouput file name: default is normed_[stim_file_name]')
@@ -51,7 +54,7 @@ elif args.models == 'e':
 vocab_file = 'models/vocab'
 
 #Run experiment
-EXP = run_norming(args.stim_file, vocab_file, model_files, args.has_header, True)
+EXP = run_norming(args.stim_file, vocab_file, model_files, args.has_header, args.multi_sent, True)
 
 if args.output_file is '':
     output_file = 'results/normed_'+args.stim_file.split('/')[-1]

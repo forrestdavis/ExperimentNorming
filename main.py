@@ -174,22 +174,21 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
                     sentences, multisent_flag)
             #Get one hots
             sent_ids = corpus.get_data()
-            print(sentences)
-            print(sent_ids)
 
             values = test_IT(sent_ids, corpus, model)
-            print(values)
 
             EXP.load_IT(model_file, x, values, multisent_flag)
-            break
 
     return EXP
 
+'''
 stim_file = 'stimuli/multi_sent.xlsx'
 vocab_file = 'models/vocab'
 model_files = glob.glob('models/*.pt')[:1]
 
 EXP = run_norming(stim_file, vocab_file, model_files, True, True, True)
+EXP.save_csv('pilot_'+stim_file.split('/')[-1])
+'''
 
 '''
 EXP.save_excel('normed_'+stim_file.split('/')[-1])
