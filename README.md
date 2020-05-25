@@ -24,7 +24,7 @@ To run norming on stimuli:
 
 ### Information on Files
 stimuli file
-* expecting one or two columns with an optional header with the sentences of the form DET NOUN will VERB (PARTICLE) DET NOUN 
+* expecting one or two columns with an optional header with the sentences of the form DET NOUN will VERB (PARTICLE) DET (ADJ |NOUN )\*NOUN 
 
 normed files are saved to results and can be formatted as an excel file or csv. The columns in this
 are:
@@ -37,11 +37,14 @@ are:
 * VERB1_REDUCTION_AVG - Average entropy reduction caused by the verb across tested models
 * VERB1_SURP_[MODEL] - Surprisal at the verb for the MODEL (one column per model)
 * VERB1_SURP_AVG - Average surprisal at the verb across tested models
-* NOUN1_SURP_[MODEL] - Surprisal at the noun for the MODEL (one column per model)
-* NOUN1_SURP_AVG - Average surprisal at the noun across tested models
+* NOUN1_ENTROPY_[MODEL] - Entropy after the noun (head if modified) for the MODEL (one column per model)
+* NOUN1_ENTROPY_AVG - Average entropy after the noun (head if modified) across tested models
+* NOUN1_SURP_[MODEL] - Surprisal at the noun (head if modified) for the MODEL (one column per model)
+* NOUN1_SURP_AVG - Average surprisal at the noun (head if modified) across tested models
 
 Same thing repeats but for the second sentence and the flag is SENT2, VERB2, etc 
-if there is a second column.
+if there is a second column. In the case of stimuli linked as a discourse unit 
+(--multi_sent) the second sentence measures are conditioned on the first sentence.
 
 The directory vocab_info includes information about the frequency of words in 
 the training corpora. Including: 
@@ -56,7 +59,8 @@ The stimuli directory houses excel files with the data in the experiment.
 To run norm.py with non-default settings:
                 
     usage: norm.py [-h] [--models MODELS] [--stim_file STIM_FILE] [--has_header]
-                   [--output_file OUTPUT_FILE] [--file_type FILE_TYPE]
+                   [--multi_sent] [--output_file OUTPUT_FILE]
+                   [--file_type FILE_TYPE]
 
     Experiment Stimuli Norming for LSTM Language Model Probing
 
@@ -66,17 +70,19 @@ To run norm.py with non-default settings:
       --stim_file STIM_FILE
                             path to stimuli file
       --has_header          Specify if the excel file has a header
+      --multi_sent          Specify if you are running multiple sentence stimuli.
       --output_file OUTPUT_FILE
                             Ouput file name: default is normed_[stim_file_name]
       --file_type FILE_TYPE
                             File type for output: [xlsx|csv|both]
 
 Example run:
-        norm.py --models all --stim_file stimuli/stim.xlsx --file_type xlsx --has_header
+        norm.py --models all --stim_file stimuli/multi_sent.xlsx --file_type xlsx --has_header --multi_sent
 
-This will look for a stimuli file called stim.xlsx that will have a header
+This will look for a stimuli file called multi_sent.xlsx that will have a header and that 
+is specified to have the sentences in column one and two processed as a discourse unit
 and output the stimuli RNN LM measures in an excel file 
-in results called normed_stim.xlsx.
+in results called normed_multi_sent.xlsx.
 
 To recreate the frequency count information in vocab_info, you need 
 the training corpora for the models. Unfortunately, they
