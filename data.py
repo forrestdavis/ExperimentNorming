@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 
 DETS = {'the', 'a', 'her', 'his', 'their', 'this', 'that', 
-        'its'}
+        'its', 'another', 'other', 'some', 'all', 'many'}
 
 class Stim:
 
@@ -234,6 +234,9 @@ class Stim:
         target_words = self.TARGET_WORDS[target_idx]
         target_idxs = self.TARGET_IDX[target_idx]
 
+        #print(target_words)
+        #print(values)
+
         #split values into seperate sentences
         if multisent_flag:
             values = values[0]
@@ -339,6 +342,8 @@ class Stim:
                     word = sent1[x]
                     if x > 1:
                         if word in DETS:
+                            if prev_word in DETS:
+                                continue
                             t_words.append(prev_word)
                             t_idx.append(x-1)
                         if word == '.':
@@ -392,6 +397,8 @@ class Stim:
                     word = sent1[x]
                     if x > 1:
                         if word in DETS:
+                            if prev_word in DETS:
+                                continue
                             t_words.append(prev_word)
                             t_idx.append(x-1)
                         if word == '.':
@@ -419,6 +426,8 @@ class Stim:
                     word = sent2[x]
                     if x > 1:
                         if word in DETS:
+                            if prev_word in DETS:
+                                continue
                             t_words.append(prev_word)
                             t_idx.append(x-1)
                         if word == '.':

@@ -182,15 +182,15 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
     return EXP
 
 '''
-stim_file = 'stimuli/multi_sent.xlsx'
+stim_file = 'stimuli/multi_sent_another.xlsx'
 vocab_file = 'models/vocab'
 model_files = glob.glob('models/*.pt')[:1]
 
 EXP = run_norming(stim_file, vocab_file, model_files, True, True, True)
+'''
+'''
 EXP.save_csv('pilot_'+stim_file.split('/')[-1])
-'''
 
-'''
 EXP.save_excel('normed_'+stim_file.split('/')[-1])
 EXP.save_csv('normed_'+stim_file.split('/')[-1])
 '''
