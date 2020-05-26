@@ -24,7 +24,7 @@ To run norming on stimuli:
 
 ### Information on Files
 stimuli file
-* expecting one or two columns with an optional header with the sentences of the form DET NOUN will VERB (PARTICLE) DET (ADJ |NOUN )\*NOUN 
+* expecting one or two columns with an optional header with the sentences of the form DET NOUN (AUX)* VERB (PARTICLE) DET (ADJ |NOUN )\*NOUN 
 
 normed files are saved to results and can be formatted as an excel file or csv. The columns in this
 are:
