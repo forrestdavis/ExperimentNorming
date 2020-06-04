@@ -16,6 +16,9 @@ parser.add_argument('--has_header', action='store_true',
 parser.add_argument('--multi_sent', action='store_true',
                     help='Specify if you are running multiple sentence stimuli.')
 
+parser.add_argument('--template', action='store_true', 
+                    help='Specify if you want to use sentence template to focus on verbs and nouns.')
+
 parser.add_argument('--output_file', type=str, 
         default='', 
         help='Ouput file name: default is normed_[stim_file_name]')
@@ -54,12 +57,14 @@ elif args.models == 'e':
 vocab_file = 'models/vocab'
 
 #Run experiment
-EXP = run_norming(args.stim_file, vocab_file, model_files, args.has_header, args.multi_sent, True)
+EXP = run_norming(args.stim_file, vocab_file, model_files, 
+        args.has_header, args.multi_sent, 
+        args.template, True)
 
 if args.output_file is '':
     output_file = 'results/normed_'+args.stim_file.split('/')[-1]
 else:
-    output_file = 'results/'+args.stim_file
+    output_file = 'results/'+args.output_file
 
 if args.file_type == 'both':
     EXP.save_excel(output_file)

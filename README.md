@@ -23,6 +23,31 @@ To run norming on stimuli:
     python norm.py --models all
 
 ### Information on Files
+There are two overarching options, outputing by word and by template. 
+
+For by word output, the current version only works with two columns (with optional header) and multi_sent flag.
+
+stimuli file
+* expecting two columns with an optional header  
+
+normed files are saved to results and can be formatted as an excel file or csv. The columns in this
+are:
+* SENT - Sentences combined from columns as given in stimuli file (lower-cased)
+* UNK_SENT - Sentences combined with any missing vocab as \<unk\> (this is what the model sees)
+* hasUNK - Boolean that is 0 if all words are in vocabulary, 1 otherwise
+* WORD_ENTROPY_[MODEL] - Entropy after the word for the MODEL (one column per model)
+* WORD_ENTROPY_AVG - Average entropy after the word across tested models
+* WORD_REDUCTION_[MODEL] - Entropy reduction caused by the word for the MODEL (one column per model)
+* WORD_REDUCTION_AVG - Average entropy reduction caused by the word across tested models
+* WORD_SURP_[MODEL] - Surprisal at the word for the MODEL (one column per model)
+* WORD_SURP_AVG - Average surprisal at the word across tested models
+
+The outputted is padded so there is a consistent number of columns. If there are less words in a given 
+sentence than the maximal, the word will be '' and the output values will be -1.
+
+
+For template option, the specification is as follows:
+
 stimuli file
 * expecting one or two columns with an optional header with the sentences of the form DET NOUN (AUX)* VERB (PARTICLE) DET (ADJ |NOUN )\*NOUN 
 
@@ -59,7 +84,7 @@ The stimuli directory houses excel files with the data in the experiment.
 To run norm.py with non-default settings:
                 
     usage: norm.py [-h] [--models MODELS] [--stim_file STIM_FILE] [--has_header]
-                   [--multi_sent] [--output_file OUTPUT_FILE]
+                   [--multi_sent] [--template] [--output_file OUTPUT_FILE]
                    [--file_type FILE_TYPE]
 
     Experiment Stimuli Norming for LSTM Language Model Probing
@@ -71,6 +96,8 @@ To run norm.py with non-default settings:
                             path to stimuli file
       --has_header          Specify if the excel file has a header
       --multi_sent          Specify if you are running multiple sentence stimuli.
+      --template            Specify if you want to use sentence template to focus
+                            on verbs and nouns.
       --output_file OUTPUT_FILE
                             Ouput file name: default is normed_[stim_file_name]
       --file_type FILE_TYPE
@@ -81,7 +108,7 @@ Example run:
 
 This will look for a stimuli file called multi_sent.xlsx that will have a header and that 
 is specified to have the sentences in column one and two processed as a discourse unit
-and output the stimuli RNN LM measures in an excel file 
+and output the stimuli RNN LM measures by word in an excel file 
 in results called normed_multi_sent.xlsx.
 
 To recreate the frequency count information in vocab_info, you need 

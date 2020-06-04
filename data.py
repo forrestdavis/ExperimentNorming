@@ -16,7 +16,8 @@ DETS = {'the', 'a', 'her', 'his', 'their', 'this', 'that',
 
 class Stim:
 
-    def __init__(self, sent_file, hasHeader=False, vocab_f='models/vocab'):
+    def __init__(self, sent_file, hasHeader=False, isTemplate=False, 
+            vocab_f='models/vocab'):
 
         #Read in stimuli
         self.EXP, self.header = read_stim_file(sent_file, hasHeader)
@@ -34,13 +35,22 @@ class Stim:
         self.UNK_SENTS = []
         
         #Extract target info
-        self.load_stim()
+        self.isTemplate = isTemplate
+        if self.isTemplate:
+            self.load_stim()
+            self.VERB_ENTROPY = {}
+            self.VERB_REDUCED_ENTROPY = {}
+            self.VERB_SURP = {}
+            self.NOUN_SURP = {}
+            self.NOUN_ENTROPY = {}
 
-        self.VERB_ENTROPY = {}
-        self.VERB_REDUCED_ENTROPY = {}
-        self.VERB_SURP = {}
-        self.NOUN_SURP = {}
-        self.NOUN_ENTROPY = {}
+        else:
+            self.load_by_word()
+            self.WORD_ENTROPY = {}
+            self.WORD_REDUCED_ENTROPY = {}
+            self.WORD_SURP = {}
+            self.MAX_WORDS = 0
+
         self.dataframe = None
 
     def save_excel(self, fname):
@@ -48,7 +58,10 @@ class Stim:
         fname = fname.split('.')[0]+'.xlsx'
 
         if self.dataframe is None:
-            self.create_df()
+            if self.isTemplate:
+                self.create_df()
+            else:
+                self.create_word_df()
 
         self.dataframe.to_excel(fname, index=False)
 
@@ -56,10 +69,96 @@ class Stim:
         fname = fname.split('.')[0]+'.csv'
 
         if self.dataframe is None:
-            self.create_df()
+            if self.isTemplate:
+                self.create_df()
+            else:
+                self.create_word_df()
 
         self.dataframe.to_csv(fname, index=False)
 
+
+    def create_word_df(self):
+
+        #create header 
+        header = ['SENT', 'UNK_SENT', 'hasUNK']
+
+        #Add entropy
+        for i in range(self.MAX_WORDS):
+            head = 'word_'+str(i)
+            header.append(head)
+            #Add entropy
+            for model in self.WORD_ENTROPY:
+                head = 'word_'+str(i)+'_ENTROPY_'+model.split('/')[-1]
+                header.append(head)
+            head = 'word_'+str(i)+'_ENTROPY_AVG'
+            header.append(head)
+            #Add entropy reduction
+            for model in self.WORD_REDUCED_ENTROPY:
+                head = 'word_'+str(i)+'_REDUCTION_'+model.split('/')[-1]
+                header.append(head)
+            head = 'word_'+str(i)+'_REDUCTION_AVG'
+            header.append(head)
+            #Add surp
+            for model in self.WORD_SURP:
+                head = 'word_'+str(i)+'_SURP_'+model.split('/')[-1]
+                header.append(head)
+            head = 'word_'+str(i)+'_SURP_AVG'
+            header.append(head)
+
+        data = []
+        for x in range(len(self.SENTS)):
+            d = []
+            sent = self.SENTS[x]
+            unk_sent = self.UNK_SENTS[x]
+            SENT = ' '.join(sent)
+            UNK_SENT = ' '.join(unk_sent)
+            hasUNK = sum(self.hasUNK[x])
+            d += [SENT, UNK_SENT, hasUNK]
+
+            w = UNK_SENT.split(' ')
+            words = ['']*self.MAX_WORDS
+            for y in range(len(words)):
+                if y > len(w)-1:
+                    word = ''
+                else:
+                    word = w[y]
+                d.append(word)
+                #Get entropy
+                ents = []
+                for model in self.WORD_ENTROPY:
+                    if y > len(w)-1:
+                        ent = -1
+                    else:
+                        ent = self.WORD_ENTROPY[model][x][y]
+                    d.append(ent)
+                    ents.append(ent)
+                avg_ent = sum(ents)/len(ents)
+                d.append(avg_ent)
+                #Get reduction
+                reds = []
+                for model in self.WORD_REDUCED_ENTROPY:
+                    if y > len(w)-1:
+                        red = -1
+                    else:
+                        red = self.WORD_REDUCED_ENTROPY[model][x][y]
+                    d.append(red)
+                    reds.append(red)
+                avg_red = sum(reds)/len(reds)
+                d.append(avg_red)
+                #Get surps
+                surps = []
+                for model in self.WORD_SURP:
+                    if y > len(w)-1:
+                        surp = -1
+                    else:
+                        surp = self.WORD_SURP[model][x][y]
+                    d.append(surp)
+                    surps.append(surp)
+                avg_surp = sum(surps)/len(surps)
+                d.append(avg_surp)
+            data.append(d)
+
+        self.dataframe = pd.DataFrame(data, columns = header) 
 
     #God this is so gross :(
     def create_df(self):
@@ -228,9 +327,9 @@ class Stim:
 
             self.dataframe = pd.DataFrame(data, columns = header) 
 
+    def load_template_IT(self, model_name, target_idx, values, 
+            multisent_flag=False):
 
-    def load_IT(self, model_name, target_idx, values, multisent_flag=False):
-        
         target_words = self.TARGET_WORDS[target_idx]
         target_idxs = self.TARGET_IDX[target_idx]
 
@@ -303,6 +402,48 @@ class Stim:
         self.NOUN_SURP[model_name].append(noun_surp)
         self.NOUN_ENTROPY[model_name].append(noun_entropy)
 
+
+    def load_word_IT(self, model_name, target_idx, values, 
+            multisent_flag=False):
+
+        w_entropy = []
+        w_surp = []
+        w_red_entropy = []
+        for sent in values:
+            if len(sent) > self.MAX_WORDS:
+                self.MAX_WORDS = len(sent)
+            for y in range(len(sent)):
+                try:
+                    ent = sent[y+1][-1]
+                except:
+                    ent = 0
+                w_entropy.append(ent)
+                w_surp.append(sent[y][1])
+                w_red_entropy.append(max(sent[y][-1]-ent, 0))
+
+        if model_name not in self.WORD_ENTROPY:
+            self.WORD_ENTROPY[model_name] = []
+        if model_name not in self.WORD_REDUCED_ENTROPY:
+            self.WORD_REDUCED_ENTROPY[model_name] = []
+        if model_name not in self.WORD_SURP:
+            self.WORD_SURP[model_name] = []
+
+        assert w_entropy != []
+
+        self.WORD_ENTROPY[model_name].append(w_entropy)
+        self.WORD_REDUCED_ENTROPY[model_name].append(w_red_entropy)
+        self.WORD_SURP[model_name].append(w_surp)
+
+
+    def load_IT(self, model_name, target_idx, values, multisent_flag=False):
+
+        if self.isTemplate:
+            self.load_template_IT(model_name, target_idx, values, 
+                    multisent_flag)
+        else:
+            self.load_word_IT(model_name, target_idx, values, 
+                    multisent_flag)
+
     def load_vocab(self, vocab):
 
         #load vocab
@@ -314,6 +455,81 @@ class Stim:
         vocab.close()
         vocab = info
         return vocab
+
+    def load_by_word(self):
+
+        #One column
+        if len(self.header) == 1:
+            SENT1 = self.EXP[self.header[0]]
+
+            #For each pair
+            for x in range(len(SENT1)):
+                sent1 = SENT1[x].lower().strip()
+                sent1 = sent1.replace(',', ' ,').replace('.', '') + ' .'
+
+                self.SENTS.append((sent1,))
+
+                sent1 = sent1.split()
+
+                has_unk = [0]
+                unk_sent1 = []
+                for x in range(len(sent1)):
+                    word = sent1[x]
+
+                    #check for unks
+                    if word not in self.model_vocab:
+                        unk_sent1.append("<unk>")
+                        has_unk[0] = 1
+                    else:
+                        unk_sent1.append(word)
+
+                self.UNK_SENTS.append((' '.join(unk_sent1),))
+                self.hasUNK.append(has_unk)
+
+        #Two columns
+        if len(self.header) == 2:
+            SENT1 = self.EXP[self.header[0]]
+            SENT2 = self.EXP[self.header[1]]
+
+            #For each pair
+            for x in range(len(SENT1)):
+                sent1 = SENT1[x].lower().strip()
+                sent2 = SENT2[x].lower().strip()
+
+                sent1 = sent1.replace(',', ' ,').replace('.', '') + ' .'
+                sent2 = sent2.replace(',', ' ,').replace('.', '') + ' .'
+
+                self.SENTS.append((sent1, sent2))
+
+                sent1 = sent1.split()
+                sent2 = sent2.split()
+
+                has_unk = [0, 0]
+                #find verb, object
+                unk_sent1 = []
+                for x in range(len(sent1)):
+                    word = sent1[x]
+
+                    #check for unks
+                    if word not in self.model_vocab:
+                        unk_sent1.append("<unk>")
+                        has_unk[0] = 1
+                    else:
+                        unk_sent1.append(word)
+
+                unk_sent2 = []
+                for x in range(len(sent2)):
+                    word = sent2[x]
+
+                    #check for unks
+                    if word not in self.model_vocab:
+                        unk_sent2.append("<unk>")
+                        has_unk[1] = 1
+                    else:
+                        unk_sent2.append(word)
+
+                self.UNK_SENTS.append((' '.join(unk_sent1), ' '.join(unk_sent2)))
+                self.hasUNK.append(has_unk)
 
     #Extract from EXP targets words and indices
     def load_stim(self):

@@ -133,7 +133,7 @@ def find_det_nouns(metrics):
         print(target_det, target_noun)
 
 def run_norming(stim_file, vocab_file, model_files, header=False, 
-        multisent_flag = False, verbose=False):
+        multisent_flag = False, isTemplate = False, verbose=False):
     ''' Given a stimuli file, model vocabulary file and model files
     return information about frequency and information
     theoretic measures'''
@@ -148,7 +148,7 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
     #Load experiments
     #__iter__ is over pairs of Min and Sub verbs
     #includes RSA results by model (ie by participant)
-    EXP = data.Stim(stim_file, header)
+    EXP = data.Stim(stim_file, header, isTemplate)
 
     #Loop through the models
     for model_file in model_files:
@@ -186,7 +186,8 @@ stim_file = 'stimuli/multi_sent_another.xlsx'
 vocab_file = 'models/vocab'
 model_files = glob.glob('models/*.pt')[:1]
 
-EXP = run_norming(stim_file, vocab_file, model_files, True, True, True)
+EXP = run_norming(stim_file, vocab_file, model_files, True, True, False, True)
+EXP.save_csv('pilot_'+stim_file.split('/')[-1])
 '''
 '''
 EXP.save_csv('pilot_'+stim_file.split('/')[-1])
