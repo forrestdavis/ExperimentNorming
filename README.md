@@ -84,7 +84,7 @@ The stimuli directory houses excel files with the data in the experiment.
 To run norm.py with non-default settings:
                 
     usage: norm.py [-h] [--models MODELS] [--stim_file STIM_FILE] [--has_header]
-                   [--multi_sent] [--template] [--output_file OUTPUT_FILE]
+                   [--multi_sent] [--template] [--avg] [--output_file OUTPUT_FILE]
                    [--file_type FILE_TYPE]
 
     Experiment Stimuli Norming for LSTM Language Model Probing
@@ -98,10 +98,13 @@ To run norm.py with non-default settings:
       --multi_sent          Specify if you are running multiple sentence stimuli.
       --template            Specify if you want to use sentence template to focus
                             on verbs and nouns.
+      --avg                 Specify if you want to return avgerage measures only
+                            (only works for default by-word measures).
       --output_file OUTPUT_FILE
                             Ouput file name: default is normed_[stim_file_name]
       --file_type FILE_TYPE
                             File type for output: [xlsx|csv|both]
+
 
 Example run:
         norm.py --models all --stim_file stimuli/multi_sent.xlsx --file_type xlsx --has_header --multi_sent
@@ -109,7 +112,8 @@ Example run:
 This will look for a stimuli file called multi_sent.xlsx that will have a header and that 
 is specified to have the sentences in column one and two processed as a discourse unit
 and output the stimuli RNN LM measures by word in an excel file 
-in results called normed_multi_sent.xlsx.
+in results called normed_multi_sent.xlsx. Running norm.py with --avg without
+specifying and output file will append avg to the file name in results.
 
 To recreate the frequency count information in vocab_info, you need 
 the training corpora for the models. Unfortunately, they

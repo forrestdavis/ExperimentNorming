@@ -1,7 +1,8 @@
 - parse data
 - get counts from parses
 - add flags for stimuli file types: yanina
-- add flags for returning only avg, only content words,
+- add flags for returning only content words,
         nouns/verbs
+- Update avg to work for more cases
 - update multi-sent to allow larger contexts
 + rsa flag

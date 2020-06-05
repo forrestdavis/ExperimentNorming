@@ -53,7 +53,7 @@ class Stim:
 
         self.dataframe = None
 
-    def save_excel(self, fname):
+    def save_excel(self, fname, avg=False):
 
         fname = fname.split('.')[0]+'.xlsx'
 
@@ -61,23 +61,23 @@ class Stim:
             if self.isTemplate:
                 self.create_df()
             else:
-                self.create_word_df()
+                self.create_word_df(avg)
 
         self.dataframe.to_excel(fname, index=False)
 
-    def save_csv(self, fname):
+    def save_csv(self, fname, avg=False):
         fname = fname.split('.')[0]+'.csv'
 
         if self.dataframe is None:
             if self.isTemplate:
                 self.create_df()
             else:
-                self.create_word_df()
+                self.create_word_df(avg)
 
         self.dataframe.to_csv(fname, index=False)
 
 
-    def create_word_df(self):
+    def create_word_df(self, avg=False):
 
         #create header 
         header = ['SENT', 'UNK_SENT', 'hasUNK']
@@ -89,19 +89,22 @@ class Stim:
             #Add entropy
             for model in self.WORD_ENTROPY:
                 head = 'word_'+str(i)+'_ENTROPY_'+model.split('/')[-1]
-                header.append(head)
+                if not avg:
+                    header.append(head)
             head = 'word_'+str(i)+'_ENTROPY_AVG'
             header.append(head)
             #Add entropy reduction
             for model in self.WORD_REDUCED_ENTROPY:
                 head = 'word_'+str(i)+'_REDUCTION_'+model.split('/')[-1]
-                header.append(head)
+                if not avg:
+                    header.append(head)
             head = 'word_'+str(i)+'_REDUCTION_AVG'
             header.append(head)
             #Add surp
             for model in self.WORD_SURP:
                 head = 'word_'+str(i)+'_SURP_'+model.split('/')[-1]
-                header.append(head)
+                if not avg:
+                    header.append(head)
             head = 'word_'+str(i)+'_SURP_AVG'
             header.append(head)
 
@@ -130,7 +133,8 @@ class Stim:
                         ent = -1
                     else:
                         ent = self.WORD_ENTROPY[model][x][y]
-                    d.append(ent)
+                    if not avg:
+                        d.append(ent)
                     ents.append(ent)
                 avg_ent = sum(ents)/len(ents)
                 d.append(avg_ent)
@@ -141,7 +145,8 @@ class Stim:
                         red = -1
                     else:
                         red = self.WORD_REDUCED_ENTROPY[model][x][y]
-                    d.append(red)
+                    if not avg:
+                        d.append(red)
                     reds.append(red)
                 avg_red = sum(reds)/len(reds)
                 d.append(avg_red)
@@ -152,7 +157,8 @@ class Stim:
                         surp = -1
                     else:
                         surp = self.WORD_SURP[model][x][y]
-                    d.append(surp)
+                    if not avg:
+                        d.append(surp)
                     surps.append(surp)
                 avg_surp = sum(surps)/len(surps)
                 d.append(avg_surp)
