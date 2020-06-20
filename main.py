@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore") #wild
 import torch
 import torch.nn as nn
 import data_test
-import data
+import rsa_data as data
 
 #set device to cpu for work on desktop :/
 device = torch.device('cpu')
@@ -133,7 +133,7 @@ def find_det_nouns(metrics):
         print(target_det, target_noun)
 
 def run_norming(stim_file, vocab_file, model_files, header=False, 
-        multisent_flag = False, isTemplate = False, verbose=False):
+        multisent_flag = False, filter_file = None, verbose=False):
     ''' Given a stimuli file, model vocabulary file and model files
     return information about frequency and information
     theoretic measures'''
@@ -148,7 +148,7 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
     #Load experiments
     #__iter__ is over pairs of Min and Sub verbs
     #includes RSA results by model (ie by participant)
-    EXP = data.Stim(stim_file, header, isTemplate)
+    EXP = data.Stim(stim_file, header, filter_file)
 
     #Loop through the models
     for model_file in model_files:
@@ -178,20 +178,20 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
             values = test_IT(sent_ids, corpus, model)
 
             EXP.load_IT(model_file, x, values, multisent_flag)
+            break
 
     return EXP
 
-'''
-stim_file = 'stimuli/multi_sent_another.xlsx'
+stim_file = 'stimuli/RSA_Analysis.xlsx'
 vocab_file = 'models/vocab'
 model_files = glob.glob('models/*.pt')[:1]
 
-EXP = run_norming(stim_file, vocab_file, model_files, True, True, False, True)
-EXP.save_csv('pilot_'+stim_file.split('/')[-1])
-'''
-'''
-EXP.save_csv('pilot_'+stim_file.split('/')[-1])
+header = True
+multisent_flag = True
+filter_file = None
+verbose = True
 
-EXP.save_excel('normed_'+stim_file.split('/')[-1])
-EXP.save_csv('normed_'+stim_file.split('/')[-1])
+EXP = run_norming(stim_file, vocab_file, model_files, header, multisent_flag, filter_file, verbose)
+'''
+EXP.save_csv('pilot_'+stim_file.split('/')[-1])
 '''
