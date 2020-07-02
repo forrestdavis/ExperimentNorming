@@ -5,7 +5,7 @@ in the models.
 
 ### Dependencies
 Requires the following python packages (available through pip):
-* [pytorch](https://pytorch.org/) v1.0.0
+* [pytorch](https://pytorch.org/) >= v1.0.0
 * [pandas](https://pandas.pydata.org) 
 * [numpy](https://numpy.org)
 

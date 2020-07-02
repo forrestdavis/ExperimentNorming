@@ -14,6 +14,7 @@ import torch
 import torch.nn as nn
 import data_test
 import rsa_data as data
+import model as m
 
 #set device to cpu for work on desktop :/
 device = torch.device('cpu')
@@ -108,6 +109,7 @@ def test_IT(data_source, corpus, model):
         data = data.unsqueeze(1)
 
         output, hidden = model(data, hidden)
+
         output_flat = output.view(-1, ntokens)
         metrics = get_IT(output_flat, targets, corpus)
         values.append(metrics)
@@ -165,6 +167,19 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
                 model = model.module
             model.rnn.flatten_parameters()
 
+            #Check we have the correct version
+            try:
+                hidden = model.init_hidden(1)
+
+                test_data = torch.tensor([0]).unsqueeze(0)
+
+                output, hidden = model(data, hidden)
+            #Problem with diff versions of torch
+            except:
+                new_model = m.RNNModel('LSTM', 28439, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                new_model.load_state_dict(model.state_dict())
+                model = new_model
+
         #loop through experimental items for EXP
         for x in range(len(EXP.UNK_SENTS)):
             sentences = list(EXP.UNK_SENTS[x])
@@ -189,9 +204,10 @@ model_files = glob.glob('models/*.pt')[:1]
 header = True
 multisent_flag = True
 filter_file = None
+#filter_file = 'filter'
 verbose = True
+hasSim = False
+only_avg = True
 
 EXP = run_norming(stim_file, vocab_file, model_files, header, multisent_flag, filter_file, verbose)
-'''
-EXP.save_csv('pilot_'+stim_file.split('/')[-1])
-'''
+EXP.save_csv('pilot_'+stim_file.split('/')[-1], model_files, only_avg, hasSim)
