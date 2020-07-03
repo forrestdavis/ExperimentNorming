@@ -425,11 +425,11 @@ def run_RSA(stim_file, vocab_file, model_files, header=False,
 
     return EXP
 
+'''
 stim_file = 'stimuli/Book1.xlsx'
 vocab_file = 'models/vocab' 
 model_files = glob.glob('models/*.pt')[:1]
 adapt(stim_file, vocab_file, model_files)
-'''
 stim_file = 'stimuli/RSA_Analysis.xlsx'
 vocab_file = 'models/vocab'
 model_files = glob.glob('models/*.pt')[:1]
