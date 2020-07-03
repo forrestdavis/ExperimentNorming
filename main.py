@@ -173,7 +173,7 @@ def get_sims(target_ids, sent_ids, corpus, model):
 
     return SIMS
 
-def load_sents(test_file, hasHeader=True):
+def load_adapt(stim_file, hasHeader=True):
 
     if hasHeader:
         EXP = pd.read_excel(stim_file)
@@ -183,11 +183,16 @@ def load_sents(test_file, hasHeader=True):
     header = EXP.columns.values
 
     sents = []
-    for x in [0, 2]:
+    ents = []
+    break_point = len(EXP[header[0]])
+    for x in range(len(header)):
         for y in EXP[header[x]]:
-            sents.append(y)
+            if x == 0 or x == 2:
+                sents.append(y)
+            else:
+                ents.append(y)
 
-    return sents
+    return sents, ents, break_point
 
 def load_model(model_file):
     #load the model
@@ -216,7 +221,7 @@ def load_model(model_file):
     return model
 
 
-def adapt(test_file, vocab_file, model_files):
+def adapt(test_file, vocab_file, model_files, has_header):
 
     #hard code data_dir
     data_path = './'
@@ -226,14 +231,20 @@ def adapt(test_file, vocab_file, model_files):
     criterion = nn.CrossEntropyLoss()
 
     #Load sents
-    sents = load_sents(test_file)
+    sents, ents, break_point = load_adapt(test_file, has_header)
 
     #backprop during eval
     torch.backends.cudnn.enabled = False
 
+    # models X sents
+    DELTAS = {}
+
     #Loop through the models
     for model_file in model_files:
         print('testing model:', model_file)
+
+        if model_file not in DELTAS:
+            DELTAS[model_file] = []
 
         #Create corpus wrapper (this is for one hoting data)
         corpus = data_test.TestSent(data_path, vocab_file, 
@@ -275,22 +286,84 @@ def adapt(test_file, vocab_file, model_files):
             post_metrics = get_IT(output_flat, targets, corpus)
             #print(post_metrics)
 
-            out = []
-            for x in range(len(post_metrics)):
-                pre_metric = pre_metrics[x]
-                post_metric = post_metrics[x]
+            delta = get_delta(pre_metrics, post_metrics)
 
-                word = pre_metric[0]
+            DELTAS[model_file].append(delta)
 
-                assert word == post_metric[0]
-                pre_surp = str(pre_metric[1])
-                post_surp = str(post_metric[1])
-                out += [word, pre_surp, post_surp]
+    return DELTAS, sents, ents, break_point
 
-            out.append('delta')
-            out.append(str(float(out[-3])-float(out[-2])))
+def get_delta(pre_metrics, post_metrics):
 
-            print(sents[i] + ',' + ','.join(out))
+    return pre_metrics[-1][1] - post_metrics[-1][1]
+
+def run_adapt(test_file, vocab_file, model_files,  
+        out_name, has_header = True, only_avg = False, out_type = 'both'):
+
+    DELTAS, sents, ents, break_point = adapt(test_file, vocab_file, model_files, has_header)
+
+    header_models = []
+    if not only_avg:
+        for model in DELTAS:
+            model = model.split('/')[-1] + '_delta'
+            header_models.append(model)
+
+    header_models.append('avg_delta')
+
+    header = ['LOW', 'LOW_ENT'] + header_models + ['HIGH', 'HIGH_ENT'] + header_models
+
+    sents_LOW = sents[:len(sents)//2]
+    sents_HIGH = sents[len(sents)//2:]
+
+    ents_LOW = ents[:len(ents)//2]
+    ents_HIGH = ents[len(ents)//2:]
+
+    assert len(sents_LOW) == break_point
+
+    all_data = []
+    for x in range(len(sents_LOW)):
+        data = []
+
+        lows = []
+        highs = []
+        for model in DELTAS:
+            values = DELTAS[model]
+
+            delta_LOW = values[:len(values)//2][x]
+            delta_HIGH = values[len(values)//2:][x]
+
+            lows.append(delta_LOW)
+            highs.append(delta_HIGH)
+
+        avg_low = sum(lows)/len(lows)
+        avg_high = sum(highs)/len(highs)
+
+        if not only_avg:
+            data += [sents_LOW[x], ents_LOW[x]]
+            data += lows
+            data.append(avg_low)
+            data += [sents_HIGH[x], ents_HIGH[x]]
+            data += highs
+            data.append(avg_high)
+        else:
+            data += [sents_LOW[x], ents_LOW[x]]
+            data.append(avg_low)
+            data += [sents_HIGH[x], ents_HIGH[x]]
+            data.append(avg_high)
+
+        all_data.append(data)
+        
+        
+    dataframe = pd.DataFrame(all_data, columns = header) 
+
+    if out_type == 'both':
+        dataframe.to_csv(out_name, index=False)
+        dataframe.to_excel(out_name, index=False)
+
+    elif out_type == 'csv':
+        dataframe.to_csv(out_name, index=False)
+
+    elif out_type == 'xlsx':
+        dataframe.to_excel(out_name, index=False)
 
 def run_norming(stim_file, vocab_file, model_files, header=False, 
         multisent_flag = False, filter_file = None, verbose=False):
@@ -428,8 +501,12 @@ def run_RSA(stim_file, vocab_file, model_files, header=False,
 '''
 stim_file = 'stimuli/Book1.xlsx'
 vocab_file = 'models/vocab' 
-model_files = glob.glob('models/*.pt')[:1]
-adapt(stim_file, vocab_file, model_files)
+out_name = 'Adapt.xlsx'
+model_files = glob.glob('models/*.pt')[:2]
+run_adapt(stim_file, vocab_file, model_files, out_name)
+'''
+
+'''
 stim_file = 'stimuli/RSA_Analysis.xlsx'
 vocab_file = 'models/vocab'
 model_files = glob.glob('models/*.pt')[:1]

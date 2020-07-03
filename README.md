@@ -23,12 +23,14 @@ To run norming on stimuli:
     python norm.py --models all
 
 ### Information on Files
-There are two overarching options, outputing by-word information-theoretic measures only (IT) and
-outputting by-word similarity to a baseline and information-theoretic measures (RSA). 
+There are three overarching options, outputing by-word information-theoretic measures only (IT),
+outputting by-word similarity to a baseline and information-theoretic measures (RSA), and 
+one-shot learning a stimuli set (ADAPT). 
 
 stimuli file
 * expecting any number of columns, where each column is a sentence, with an optional header  
 * if running RSA the first column will be treated as the baseline
+* if running ADAPT the input format should be SENT1, ENT, SENT2, ENT
 
 normed files are saved to results and can be formatted as an excel file or csv. The columns in this
 are, for each sentence (subscripted i, the baseline will be SENT_0 for RSA)
@@ -48,6 +50,17 @@ values for the measures is appended:
 * sent_i_word_k_sup_[MODEL] - Surprisal at the word for the MODEL
 * sent_i_word_k_sim_[MODEL] - Similarity (if RSA) between the last hidden layer for the baseline and the word for the MODEL
 
+
+For ADAPT the columns are as follows:
+* LOW - First column of sentences from input stimuli file
+* HIGH_ENT - Entropy of verb given in input stimuli file (second column in stimuli file)
+* MODEL_delta - Change in surprisal at the final word after MODEL one-shot learns sentence
+* avg_delta - Average change in surprisal at the final word after each model one-shot learns sentence
+* HIGH - third column of sentences from input stimuli file
+* HIGH_ENT - Entropy of verb given in input stimuli file (fourth column in stimuli file)
+* MODEL_delta - Change in surprisal at the final word after MODEL one-shot learns sentence
+* avg_delta - Average change in surprisal at the final word after each model one-shot learns sentence
+
 The directory vocab_info includes information about the frequency of words in 
 the training corpora. Including: 
 * raw_vocab - The vocabulary of the models
@@ -59,7 +72,7 @@ the training corpora. Including:
 The stimuli directory houses excel files with the data in the experiment. 
 
 To run norm.py with non-default settings:
-                
+
     usage: norm.py [-h] [--exp EXP] [--models MODELS] [--has_header]
                    [--multi_sent] [--avg] [--filter FILTER]
                    [--stim_file STIM_FILE] [--output_file OUTPUT_FILE]
@@ -69,19 +82,20 @@ To run norm.py with non-default settings:
 
     optional arguments:
       -h, --help            show this help message and exit
-      --exp EXP             experiment type [IT|RSA]
+      --exp EXP             experiment type [IT|RSA|ADAPT]
       --models MODELS       model to run [a|b|c|d|e|all]
       --has_header          Specify if the excel file has a header
       --multi_sent          Specify if you are running multiple sentence stimuli
+                            (only for IT|RSA)
       --avg                 Specify if you want to return only average measures
       --filter FILTER       Specify name of file to words to filter from results
+                            (only for IT|RSA)
       --stim_file STIM_FILE
                             path to stimuli file
       --output_file OUTPUT_FILE
                             Ouput file name: default is normed_[stim_file_name]
       --file_type FILE_TYPE
                             File type for output: [xlsx|csv|both]
-
 
 Example run:
         
@@ -95,6 +109,8 @@ in an xlsx file called normed_RSA_Analysis.xlsx. By specifiying --models all and
 --avg, the output will be only the average values for that word across the models.  
 Additionally running norm.py with --avg without
 specifying and output file will append avg to the file name in results (normed_avg_RSA_Analysis.xlsx).
+
+The flags filter and multi_sent only apply to the IT and RSA experiments. 
 
 To recreate the frequency count information in vocab_info, you need 
 the training corpora for the models. Unfortunately, they

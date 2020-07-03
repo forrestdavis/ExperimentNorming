@@ -4,7 +4,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Experiment Stimuli Norming for LSTM Language Model Probing')
 
 parser.add_argument('--exp', type=str, default='IT', 
-                    help='experiment type [IT|RSA]')
+                    help='experiment type [IT|RSA|ADAPT]')
 
 parser.add_argument('--models', type=str, default='a',
                     help='model to run [a|b|c|d|e|all]')
@@ -13,14 +13,14 @@ parser.add_argument('--has_header', action='store_true',
                     help='Specify if the excel file has a header')
 
 parser.add_argument('--multi_sent', action='store_true',
-                    help='Specify if you are running multiple sentence stimuli')
+                    help='Specify if you are running multiple sentence stimuli (only for IT|RSA)')
 
 parser.add_argument('--avg', action='store_true', 
                     help='Specify if you want to return only average measures')
 
 parser.add_argument('--filter', type=str, 
         default=None, 
-        help='Specify name of file to words to filter from results')
+        help='Specify name of file to words to filter from results (only for IT|RSA)')
 
 parser.add_argument('--stim_file', type=str, 
         default='stimuli/The_boy_will_bounce_the_ball.xlsx', 
@@ -63,6 +63,8 @@ elif args.models == 'd':
 elif args.models == 'e':
     model_files = list(filter(lambda x: '_e_' in x, model_files))[:1]
 
+model_files.sort()
+
 vocab_file = 'models/vocab'
 verbose = True
 
@@ -87,10 +89,25 @@ if args.output_file is '':
 else:
     output_file = 'results/'+args.output_file
 
-if args.file_type == 'both':
-    EXP.save_excel(output_file, model_files, args.avg, hasSim)
-    EXP.save_csv(output_file, model_files, args.avg, hasSim)
-elif args.file_type == 'csv':
-    EXP.save_csv(output_file, model_files, args.avg, hasSim)
-elif args.file_type == 'xlsx':
-    EXP.save_excel(output_file, model_files, args.avg, hasSim)
+#Run experiment
+if args.exp == 'IT':
+    EXP = run_norming(args.stim_file, vocab_file, model_files, args.has_header,
+            args.multi_sent, args.filter, verbose)
+elif args.exp == 'RSA':
+    EXP = run_RSA(args.stim_file, vocab_file, model_files, args.has_header, 
+            args.multi_sent, args.filter, verbose)
+
+elif args.exp == 'ADAPT':
+    run_adapt(args.stim_file, vocab_file, model_files, output_file, args.has_header, 
+            args.avg, args.file_type)
+
+#save output IT|RSA
+if args.exp == 'IT' or args.exp == 'RSA':
+
+    if args.file_type == 'both':
+        EXP.save_excel(output_file, model_files, args.avg, hasSim)
+        EXP.save_csv(output_file, model_files, args.avg, hasSim)
+    elif args.file_type == 'csv':
+        EXP.save_csv(output_file, model_files, args.avg, hasSim)
+    elif args.file_type == 'xlsx':
+        EXP.save_excel(output_file, model_files, args.avg, hasSim)
