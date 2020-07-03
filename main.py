@@ -18,6 +18,7 @@ import data_test
 import data
 import model as m
 import numpy as np
+import pandas as pd
 
 #set device to cpu if working on laptop :)
 device = torch.device('cpu')
@@ -172,6 +173,124 @@ def get_sims(target_ids, sent_ids, corpus, model):
 
     return SIMS
 
+def load_sents(test_file, hasHeader=True):
+
+    if hasHeader:
+        EXP = pd.read_excel(stim_file)
+    else:
+        EXP = pd.read_excel(stim_file, header=None)
+
+    header = EXP.columns.values
+
+    sents = []
+    for x in [0, 2]:
+        for y in EXP[header[x]]:
+            sents.append(y)
+
+    return sents
+
+def load_model(model_file):
+    #load the model
+    with open(model_file, 'rb') as f:
+        #run on local cpu for now
+        model = torch.load(f, map_location='cpu')
+
+        # make in continous chunk of memory for speed
+        if isinstance(model, torch.nn.DataParallel):
+            model = model.module
+        model.rnn.flatten_parameters()
+
+        #Check we have the correct version
+        try:
+            hidden = model.init_hidden(1)
+
+            test_data = torch.tensor([0]).unsqueeze(0)
+
+            output, hidden = model(data, hidden)
+        #Problem with diff versions of torch
+        except:
+            new_model = m.RNNModel('LSTM', 28439, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+            new_model.load_state_dict(model.state_dict())
+            model = new_model
+
+    return model
+
+
+def adapt(test_file, vocab_file, model_files):
+
+    #hard code data_dir
+    data_path = './'
+
+
+    #set loss function to be cross entropy
+    criterion = nn.CrossEntropyLoss()
+
+    #Load sents
+    sents = load_sents(test_file)
+
+    #backprop during eval
+    torch.backends.cudnn.enabled = False
+
+    #Loop through the models
+    for model_file in model_files:
+        print('testing model:', model_file)
+
+        #Create corpus wrapper (this is for one hoting data)
+        corpus = data_test.TestSent(data_path, vocab_file, 
+                sents, False)
+        #Get one hots
+        sent_ids = corpus.get_data()
+        for i in range(len(sent_ids)):
+
+            #load model 
+            model = load_model(model_file)
+            model.eval()
+
+            sent_id = sent_ids[i].to(device)
+
+            #Pre-adapt ITs
+            hidden = model.init_hidden(1)
+            data, targets = test_get_batch(sent_id)
+
+            data = data.unsqueeze(1)
+            output, hidden = model(data, hidden)
+
+            output_flat = output.view(-1, len(corpus.dictionary))
+            pre_metrics = get_IT(output_flat, targets, corpus)
+            #print(pre_metrics)
+
+            #backprop
+            loss = criterion(output_flat, targets)
+
+            loss.backward()
+            torch.nn.utils.clip_grad_norm(model.parameters(), 0.25)
+            for param in model.parameters():
+                if param.grad is not None:
+                    param.data.add_(-20, param.grad.data)
+
+            #Post-adapt ITs
+            hidden = model.init_hidden(1)
+            output, hidden = model(data, hidden)
+            output_flat = output.view(-1, len(corpus.dictionary))
+            post_metrics = get_IT(output_flat, targets, corpus)
+            #print(post_metrics)
+
+            out = []
+            for x in range(len(post_metrics)):
+                pre_metric = pre_metrics[x]
+                post_metric = post_metrics[x]
+
+                word = pre_metric[0]
+
+                assert word == post_metric[0]
+                pre_surp = str(pre_metric[1])
+                post_surp = str(post_metric[1])
+                out += [word, pre_surp, post_surp]
+
+            out.append('delta')
+            out.append(str(float(out[-3])-float(out[-2])))
+
+            print(sents[i] + ',' + ','.join(out))
 
 def run_norming(stim_file, vocab_file, model_files, header=False, 
         multisent_flag = False, filter_file = None, verbose=False):
@@ -306,6 +425,10 @@ def run_RSA(stim_file, vocab_file, model_files, header=False,
 
     return EXP
 
+stim_file = 'stimuli/Book1.xlsx'
+vocab_file = 'models/vocab' 
+model_files = glob.glob('models/*.pt')[:1]
+adapt(stim_file, vocab_file, model_files)
 '''
 stim_file = 'stimuli/RSA_Analysis.xlsx'
 vocab_file = 'models/vocab'

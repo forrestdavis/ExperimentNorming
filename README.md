@@ -119,4 +119,8 @@ csv files, which are saved in vocab_info as noun_vocab_freq.csv and verb_vocab_f
 
     python scripts/freq.py
 
+Included in main is a function adapt, which takes sentences from an excel file and one-shot
+learns each sentence, returning surprisals before and after learning and the difference at
+the target.
+
 ### References
