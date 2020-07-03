@@ -211,7 +211,19 @@ class Stim:
                 #for each word
                 for z in range(table.shape[1]):
                     entry = table[x][z]
-                    row += entry.return_data(model_files, only_avg)
+                    try:
+                        row += entry.return_data(model_files, only_avg)
+                    except:
+                        continue
+
+            if len(row) != len(header):
+                y = len(row)
+                for z in range(y, len(header)):
+                    if header[z].split('_')[-2] == 'word':
+                        row.append('NULL')
+                    else:
+                        row.append(-1)
+
             data.append(row)
 
         self.dataframe = pd.DataFrame(data, columns = header) 

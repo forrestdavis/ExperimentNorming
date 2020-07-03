@@ -23,53 +23,31 @@ To run norming on stimuli:
     python norm.py --models all
 
 ### Information on Files
-There are two overarching options, outputing by word and by template. 
-
-For by word output, the current version only works with two columns (with optional header) and multi_sent flag.
-
-stimuli file
-* expecting two columns with an optional header  
-
-normed files are saved to results and can be formatted as an excel file or csv. The columns in this
-are:
-* SENT - Sentences combined from columns as given in stimuli file (lower-cased)
-* UNK_SENT - Sentences combined with any missing vocab as \<unk\> (this is what the model sees)
-* hasUNK - Boolean that is 0 if all words are in vocabulary, 1 otherwise
-* WORD_ENTROPY_[MODEL] - Entropy after the word for the MODEL (one column per model)
-* WORD_ENTROPY_AVG - Average entropy after the word across tested models
-* WORD_REDUCTION_[MODEL] - Entropy reduction caused by the word for the MODEL (one column per model)
-* WORD_REDUCTION_AVG - Average entropy reduction caused by the word across tested models
-* WORD_SURP_[MODEL] - Surprisal at the word for the MODEL (one column per model)
-* WORD_SURP_AVG - Average surprisal at the word across tested models
-
-The outputted is padded so there is a consistent number of columns. If there are less words in a given 
-sentence than the maximal, the word will be '' and the output values will be -1.
-
-
-For template option, the specification is as follows:
+There are two overarching options, outputing by information-theoretic measures only (IT) and
+outputting similarity to a baseline and information-theoretic measures (RSA). Individual 
+sentences should be placed in seperate columns. 
 
 stimuli file
-* expecting one or two columns with an optional header with the sentences of the form DET NOUN (AUX)* VERB (PARTICLE) DET (ADJ |NOUN )\*NOUN 
+* expecting any number of columns, where each column is a sentence, with an optional header  
+* if running RSA the first column will be treated as the baseline
 
 normed files are saved to results and can be formatted as an excel file or csv. The columns in this
-are:
-* SENT1 - First sentence as given in the stimuli file (lower-cased)
-* UNK_SENT1 - First sentence with any missing vocab as \<unk\> (this is what the model sees)
-* hasUNK1 - Boolean that is 0 if all words are in vocabulary, 1 otherwise
-* VERB1_ENTROPY_[MODEL] - Entropy after the verb for the MODEL (one column per model)
-* VERB1_ENTROPY_AVG - Average entropy after the verb across tested models
-* VERB1_REDUCTION_[MODEL] - Entropy reduction caused by the verb for the MODEL (one column per model)
-* VERB1_REDUCTION_AVG - Average entropy reduction caused by the verb across tested models
-* VERB1_SURP_[MODEL] - Surprisal at the verb for the MODEL (one column per model)
-* VERB1_SURP_AVG - Average surprisal at the verb across tested models
-* NOUN1_ENTROPY_[MODEL] - Entropy after the noun (head if modified) for the MODEL (one column per model)
-* NOUN1_ENTROPY_AVG - Average entropy after the noun (head if modified) across tested models
-* NOUN1_SURP_[MODEL] - Surprisal at the noun (head if modified) for the MODEL (one column per model)
-* NOUN1_SURP_AVG - Average surprisal at the noun (head if modified) across tested models
+are, for each sentence (subscripted i, the baseline will be SENT_0 for RSA)
+* SENT_i - Sentences combined from columns as given in stimuli file (lower-cased)
+* UNK_SENT_i - Sentences combined with any missing vocab as \<unk\> (this is what the model sees)
+* hasUNK_i - Boolean that is 0 if all words are in vocabulary, 1 otherwise
 
-Same thing repeats but for the second sentence and the flag is SENT2, VERB2, etc 
-if there is a second column. In the case of stimuli linked as a discourse unit 
-(--multi_sent) the second sentence measures are conditioned on the first sentence.
+Then the columns range over each word by sentence. For mismatching sentence lengths a dummy word NULL with -1
+values for the measures is appended:
+
+* sent_i_word_j_ent_avg - Average entropy after the word across tested models
+* sent_i_word_j_red_avg - Average entropy reduction caused by the word across tested models
+* sent_i_word_j_surp_avg - Average surprsial at the word across tested models
+* sent_i_word_j_sim_avg - Average similarity (if RSA) between the last hidden layer for the baseline and the word
+* sent_i_word_j_ent_[MODEL] - Entropy after the word for the MODEL 
+* sent_i_word_j_red_[MODEL] - Entropy reduction caused by the word for the MODEL
+* sent_i_word_j_sup_[MODEL] - Surprisal at the word for the MODEL
+* sent_i_word_j_sim_[MODEL] - Similarity (if RSA) between the last hidden layer for the baseline and the word for the MODEL
 
 The directory vocab_info includes information about the frequency of words in 
 the training corpora. Including: 
@@ -83,23 +61,23 @@ The stimuli directory houses excel files with the data in the experiment.
 
 To run norm.py with non-default settings:
                 
-    usage: norm.py [-h] [--models MODELS] [--stim_file STIM_FILE] [--has_header]
-                   [--multi_sent] [--template] [--avg] [--output_file OUTPUT_FILE]
+    usage: norm.py [-h] [--exp EXP] [--models MODELS] [--has_header]
+                   [--multi_sent] [--avg] [--filter FILTER]
+                   [--stim_file STIM_FILE] [--output_file OUTPUT_FILE]
                    [--file_type FILE_TYPE]
 
     Experiment Stimuli Norming for LSTM Language Model Probing
 
     optional arguments:
       -h, --help            show this help message and exit
+      --exp EXP             experiment type [IT|RSA]
       --models MODELS       model to run [a|b|c|d|e|all]
+      --has_header          Specify if the excel file has a header
+      --multi_sent          Specify if you are running multiple sentence stimuli
+      --avg                 Specify if you want to return only average measures
+      --filter FILTER       Specify name of file to words to filter from results
       --stim_file STIM_FILE
                             path to stimuli file
-      --has_header          Specify if the excel file has a header
-      --multi_sent          Specify if you are running multiple sentence stimuli.
-      --template            Specify if you want to use sentence template to focus
-                            on verbs and nouns.
-      --avg                 Specify if you want to return avgerage measures only
-                            (only works for default by-word measures).
       --output_file OUTPUT_FILE
                             Ouput file name: default is normed_[stim_file_name]
       --file_type FILE_TYPE
@@ -107,12 +85,15 @@ To run norm.py with non-default settings:
 
 
 Example run:
-        norm.py --models all --stim_file stimuli/multi_sent.xlsx --file_type xlsx --has_header --multi_sent
+        norm.py --exp RSA --models all --stim_file stimuli/RSA_Analysis.xlsx --file_type xlsx --has_header --multi_sent --avg --filter
 
-This will look for a stimuli file called multi_sent.xlsx that will have a header and that 
-is specified to have the sentences in column one and two processed as a discourse unit
-and output the stimuli RNN LM measures by word in an excel file 
-in results called normed_multi_sent.xlsx. Running norm.py with --avg without
+This will look for a stimuli file called RSA_Analysis.xlsx that will have a header and that 
+has as its first column a baseline for RSA comparison. The remaining sentences will be 
+processed as a discourse unit as per --multi_sent. The information-theoretic measures 
+and similarity of the baseline to each of the words in the unit will be returned 
+in an xlsx file called normed_RSA_Analysis.xlsx. By specifiying --models all and 
+--avg, the output will be only the average values for that word across the models.  
+Additionally running norm.py with --avg without
 specifying and output file will append avg to the file name in results.
 
 To recreate the frequency count information in vocab_info, you need 
