@@ -1,6 +1,6 @@
 # ExperimentNorming
 Project for norming experimental stimuli relative to RNN models. Specifically, outputting 
-surprisal metrics, frequency info, and checking if experimental vocabulary are contained 
+surprisal metrics, frequency info, computing similarity metrics, and checking if experimental vocabulary are contained 
 in the models. 
 
 ### Dependencies
@@ -23,9 +23,8 @@ To run norming on stimuli:
     python norm.py --models all
 
 ### Information on Files
-There are two overarching options, outputing by information-theoretic measures only (IT) and
-outputting similarity to a baseline and information-theoretic measures (RSA). Individual 
-sentences should be placed in seperate columns. 
+There are two overarching options, outputing by-word information-theoretic measures only (IT) and
+outputting by-word similarity to a baseline and information-theoretic measures (RSA). 
 
 stimuli file
 * expecting any number of columns, where each column is a sentence, with an optional header  
@@ -40,14 +39,14 @@ are, for each sentence (subscripted i, the baseline will be SENT_0 for RSA)
 Then the columns range over each word by sentence. For mismatching sentence lengths a dummy word NULL with -1
 values for the measures is appended:
 
-* sent_i_word_j_ent_avg - Average entropy after the word across tested models
-* sent_i_word_j_red_avg - Average entropy reduction caused by the word across tested models
-* sent_i_word_j_surp_avg - Average surprsial at the word across tested models
-* sent_i_word_j_sim_avg - Average similarity (if RSA) between the last hidden layer for the baseline and the word
-* sent_i_word_j_ent_[MODEL] - Entropy after the word for the MODEL 
-* sent_i_word_j_red_[MODEL] - Entropy reduction caused by the word for the MODEL
-* sent_i_word_j_sup_[MODEL] - Surprisal at the word for the MODEL
-* sent_i_word_j_sim_[MODEL] - Similarity (if RSA) between the last hidden layer for the baseline and the word for the MODEL
+* sent_i_word_k_ent_avg - Average entropy after the word across tested models
+* sent_i_word_k_red_avg - Average entropy reduction caused by the word across tested models
+* sent_i_word_k_surp_avg - Average surprsial at the word across tested models
+* sent_i_word_k_sim_avg - Average similarity (if RSA) between the last hidden layer for the baseline and the word
+* sent_i_word_k_ent_[MODEL] - Entropy after the word for the MODEL 
+* sent_i_word_k_red_[MODEL] - Entropy reduction caused by the word for the MODEL
+* sent_i_word_k_sup_[MODEL] - Surprisal at the word for the MODEL
+* sent_i_word_k_sim_[MODEL] - Similarity (if RSA) between the last hidden layer for the baseline and the word for the MODEL
 
 The directory vocab_info includes information about the frequency of words in 
 the training corpora. Including: 
@@ -85,6 +84,7 @@ To run norm.py with non-default settings:
 
 
 Example run:
+        
         norm.py --exp RSA --models all --stim_file stimuli/RSA_Analysis.xlsx --file_type xlsx --has_header --multi_sent --avg --filter
 
 This will look for a stimuli file called RSA_Analysis.xlsx that will have a header and that 
@@ -94,7 +94,7 @@ and similarity of the baseline to each of the words in the unit will be returned
 in an xlsx file called normed_RSA_Analysis.xlsx. By specifiying --models all and 
 --avg, the output will be only the average values for that word across the models.  
 Additionally running norm.py with --avg without
-specifying and output file will append avg to the file name in results.
+specifying and output file will append avg to the file name in results (normed_avg_RSA_Analysis.xlsx).
 
 To recreate the frequency count information in vocab_info, you need 
 the training corpora for the models. Unfortunately, they
