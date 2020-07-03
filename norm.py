@@ -23,7 +23,7 @@ parser.add_argument('--filter', type=str,
         help='Specify name of file to words to filter from results (only for IT|RSA)')
 
 parser.add_argument('--stim_file', type=str, 
-        default='stimuli/The_boy_will_bounce_the_ball.xlsx', 
+        default='stimuli/multi_sent.xlsx', 
         help='path to stimuli file')
 
 parser.add_argument('--output_file', type=str, 
@@ -72,14 +72,6 @@ if args.exp == 'IT':
     hasSim = False
 else:
     hasSim = True
-
-#Run experiment
-if args.exp == 'IT':
-    EXP = run_norming(args.stim_file, vocab_file, model_files, args.has_header,
-            args.multi_sent, args.filter, verbose)
-elif args.exp == 'RSA':
-    EXP = run_RSA(args.stim_file, vocab_file, model_files, args.has_header, 
-            args.multi_sent, args.filter, verbose)
 
 if args.output_file is '':
     if args.avg:

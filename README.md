@@ -20,7 +20,11 @@ From spaCy you need the pretrained English model "en_core_web_sm":
 ### Quick Usage
 To run norming on stimuli:
 
-    python norm.py --models all
+    python norm.py --has_header --models all
+
+This runs with default settings, stimuli file is assumed to be multi_sent.xlsx (in stimuli/), 
+runs on all models (--models all), sentences will be treated seperately, and by-model and 
+average output will be saved from IT experiment to results/normed_multi_sent(.xlsx and .csv). 
 
 ### Information on Files
 There are three overarching options, outputing by-word information-theoretic measures only (IT),

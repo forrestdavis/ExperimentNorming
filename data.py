@@ -294,7 +294,7 @@ class Stim:
             for y in range(len(target_idxs)):
                 t_word = target_words[y]
                 IT_word = IT[target_idxs[y]]
-                assert IT_word[0] == t_word
+                assert IT_word[0] == t_word or IT_word[0] == '<unk>'
 
                 surp = IT_word[1]
                 try:
