@@ -3,24 +3,28 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Experiment Stimuli Norming for LSTM Language Model Probing')
 
+parser.add_argument('--exp', type=str, default='IT', 
+                    help='experiment type [IT|RSA]')
+
 parser.add_argument('--models', type=str, default='a',
                     help='model to run [a|b|c|d|e|all]')
-
-parser.add_argument('--stim_file', type=str, 
-        default='stimuli/The_boy_will_bounce_the_ball.xlsx', 
-        help='path to stimuli file')
 
 parser.add_argument('--has_header', action='store_true',
                     help='Specify if the excel file has a header')
 
 parser.add_argument('--multi_sent', action='store_true',
-                    help='Specify if you are running multiple sentence stimuli.')
-
-parser.add_argument('--template', action='store_true', 
-                    help='Specify if you want to use sentence template to focus on verbs and nouns.')
+                    help='Specify if you are running multiple sentence stimuli')
 
 parser.add_argument('--avg', action='store_true', 
-                    help='Specify if you want to return avgerage measures only (only works for default by-word measures).')
+                    help='Specify if you want to return only average measures')
+
+parser.add_argument('--filter', type=str, 
+        default=None, 
+        help='Specify name of file to words to filter from results')
+
+parser.add_argument('--stim_file', type=str, 
+        default='stimuli/The_boy_will_bounce_the_ball.xlsx', 
+        help='path to stimuli file')
 
 parser.add_argument('--output_file', type=str, 
         default='', 
@@ -37,8 +41,10 @@ data_path = './'
 #hardcode vocab file for now
 #vocab_file = '/Users/forrestdavis/Data/models/vocab'
 
+#set device to gpu for work on desktop :)
+#device = torch.device('cuda:0')
 
-#set device to cpu for work on desktop :/
+#set device to cpu for work on laptop
 device = torch.device('cpu')
 
 #set loss function to be cross entropy
@@ -58,11 +64,20 @@ elif args.models == 'e':
     model_files = list(filter(lambda x: '_e_' in x, model_files))[:1]
 
 vocab_file = 'models/vocab'
+verbose = True
+
+if args.exp == 'IT':
+    hasSim = False
+else:
+    hasSim = True
 
 #Run experiment
-EXP = run_norming(args.stim_file, vocab_file, model_files, 
-        args.has_header, args.multi_sent, 
-        args.template, True)
+if args.exp == 'IT':
+    EXP = run_norming(args.stim_file, vocab_file, model_files, args.has_header,
+            args.multi_sent, args.filter, verbose)
+elif args.exp == 'RSA':
+    EXP = run_RSA(args.stim_file, vocab_file, model_files, args.has_header, 
+            args.multi_sent, args.filter, verbose)
 
 if args.output_file is '':
     if args.avg:
@@ -73,9 +88,9 @@ else:
     output_file = 'results/'+args.output_file
 
 if args.file_type == 'both':
-    EXP.save_excel(output_file, args.avg)
-    EXP.save_csv(output_file, args.avg)
+    EXP.save_excel(output_file, model_files, args.avg, hasSim)
+    EXP.save_csv(output_file, model_files, args.avg, hasSim)
 elif args.file_type == 'csv':
-    EXP.save_csv(output_file, args.avg)
+    EXP.save_csv(output_file, model_files, args.avg, hasSim)
 elif args.file_type == 'xlsx':
-    EXP.save_excel(output_file, args.avg)
+    EXP.save_excel(output_file, model_files, args.avg, hasSim)

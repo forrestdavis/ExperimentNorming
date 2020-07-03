@@ -2,8 +2,10 @@
 #This script includes a number of functions 
 #for measuring the behavior of a feed-forward 
 #LSTM with two layers.
+#Added in July: representational analysis 
 #Use case in mind was norming human 
 #for easy comparision to models
+#Created by Forrest Davis 
 #############################################
 import math
 import glob
@@ -13,11 +15,14 @@ warnings.filterwarnings("ignore") #wild
 import torch
 import torch.nn as nn
 import data_test
-import rsa_data as data
+import data
 import model as m
+import numpy as np
 
-#set device to cpu for work on desktop :/
+#set device to cpu if working on laptop :)
 device = torch.device('cpu')
+#set device to cpu if working on desktop :))))
+#device = torch.device("cuda:0")
 
 #set loss function to be cross entropy
 criterion = nn.CrossEntropyLoss()
@@ -115,27 +120,62 @@ def test_IT(data_source, corpus, model):
         values.append(metrics)
     return values
 
-def find_det_nouns(metrics):
+def get_sims(target_ids, sent_ids, corpus, model):
 
-    period_idx = []
-    for x in range(len(metrics)):
-        if metrics[x][0] == '.':
-            period_idx.append(x)
+    #cancel dropout
+    model.eval()
 
-    context_det = metrics[period_idx[0]-2]
-    context_noun = metrics[period_idx[0]-1]
+    #don't learn
+    model.zero_grad()
 
-    target_det = metrics[period_idx[1]-2]
-    target_noun = metrics[period_idx[1]-1]
+    target_ids = target_ids[0][:-1].to(device)
+    target_data, target_targets = test_get_batch(target_ids)
+    target_data = target_data.unsqueeze(1)
 
-    if context_det[1] > target_det[1]:
-        print('fudge')
-        print(metrics)
-        print(context_det, context_noun)
-        print(target_det, target_noun)
+    hidden = model.init_hidden(1)
+
+    output, hidden = model(target_data, hidden)
+
+    #hidden[0] is hidden; hidden[1] is cell state
+    hidden = hidden[0].data
+    layer_1_target = hidden[1].cpu().squeeze()
+
+    SIMS = []
+    
+    for i in range(len(sent_ids)):
+        model.zero_grad()
+        sims = []
+        s_ids = sent_ids[i]
+        data, targets = test_get_batch(s_ids)
+
+        data = data.unsqueeze(1)
+
+        hidden = model.init_hidden(1)
+
+        for word_index in range(data.size(0)):
+            hidden = repackage_hidden(hidden)
+
+            word_input = data[word_index]
+            
+            #What's going in 
+            input_word = corpus.dictionary.idx2word[int(word_input.data)]
+            output, hidden = model(torch.tensor([[word_input]]).to(device), hidden)
+            if input_word == "<eos>":
+                continue
+
+            h = hidden[0].data
+            layer_1 = h[1].cpu().squeeze()
+
+            sim = np.corrcoef(layer_1_target, layer_1)[0, 1]
+            sims.append((input_word, sim))
+        SIMS.append(sims)
+
+    return SIMS
+
 
 def run_norming(stim_file, vocab_file, model_files, header=False, 
         multisent_flag = False, filter_file = None, verbose=False):
+
     ''' Given a stimuli file, model vocabulary file and model files
     return information about frequency and information
     theoretic measures'''
@@ -148,8 +188,6 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
     criterion = nn.CrossEntropyLoss()
 
     #Load experiments
-    #__iter__ is over pairs of Min and Sub verbs
-    #includes RSA results by model (ie by participant)
     EXP = data.Stim(stim_file, header, filter_file)
 
     #Loop through the models
@@ -193,10 +231,82 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
             values = test_IT(sent_ids, corpus, model)
 
             EXP.load_IT(model_file, x, values, multisent_flag)
-            break
 
     return EXP
 
+def run_RSA(stim_file, vocab_file, model_files, header=False, 
+        multisent_flag = False, filter_file = None, verbose=False):
+
+    ''' Given a stimuli file, model vocabulary file and model files
+    return information about information
+    theoretic measures and similarity'''
+
+    #hard code data_dir
+    data_path = './'
+
+
+    #set loss function to be cross entropy
+    criterion = nn.CrossEntropyLoss()
+
+    #Load experiments
+    EXP = data.Stim(stim_file, header, filter_file)
+
+    #Loop through the models
+    for model_file in model_files:
+        if verbose:
+            print('testing model:', model_file)
+
+        #load the model
+        with open(model_file, 'rb') as f:
+            #run on local cpu for now
+            model = torch.load(f, map_location='cpu')
+
+            # make in continous chunk of memory for speed
+            if isinstance(model, torch.nn.DataParallel):
+                model = model.module
+            model.rnn.flatten_parameters()
+
+            #Check we have the correct version
+            try:
+                hidden = model.init_hidden(1)
+
+                test_data = torch.tensor([0]).unsqueeze(0)
+
+                output, hidden = model(data, hidden)
+            #Problem with diff versions of torch
+            except:
+                new_model = m.RNNModel('LSTM', 28439, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                new_model.load_state_dict(model.state_dict())
+                model = new_model
+
+        #loop through experimental items for EXP
+        for x in range(len(EXP.UNK_SENTS)):
+            sentences = list(EXP.UNK_SENTS[x])
+
+            target = sentences[:1]
+            sentences = sentences[1:]
+
+            #Create corpus wrapper (this is for one hoting data)
+            corpus = data_test.TestSent(data_path, vocab_file, 
+                    target, False)
+            #Get one hots
+            target_ids = corpus.get_data()
+
+            #Create corpus wrapper (this is for one hoting data)
+            corpus = data_test.TestSent(data_path, vocab_file, 
+                    sentences, multisent_flag)
+            #Get one hots
+            sent_ids = corpus.get_data()
+
+            sims = get_sims(target_ids, sent_ids, corpus, model)
+
+            values = test_IT(sent_ids, corpus, model)
+
+            EXP.load_IT(model_file, x, values, multisent_flag, sims)
+
+    return EXP
+
+'''
 stim_file = 'stimuli/RSA_Analysis.xlsx'
 vocab_file = 'models/vocab'
 model_files = glob.glob('models/*.pt')[:1]
@@ -206,8 +316,10 @@ multisent_flag = True
 filter_file = None
 #filter_file = 'filter'
 verbose = True
-hasSim = False
+hasSim = True
 only_avg = True
 
-EXP = run_norming(stim_file, vocab_file, model_files, header, multisent_flag, filter_file, verbose)
-EXP.save_csv('pilot_'+stim_file.split('/')[-1], model_files, only_avg, hasSim)
+#EXP = run_norming(stim_file, vocab_file, model_files, header, multisent_flag, filter_file, verbose)
+EXP = run_RSA(stim_file, vocab_file, model_files, header, multisent_flag, filter_file, verbose)
+#EXP.save_csv('pilot_UNMULTI_'+stim_file.split('/')[-1], model_files, only_avg, hasSim)
+'''
