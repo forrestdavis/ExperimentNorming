@@ -303,7 +303,7 @@ class Stim:
                     ent = 0
                 red_ent = max(IT_word[-1]-ent, 0)
                 if sims:
-                    measures = (surp, ent, red_ent, sims[x][y][-1])
+                    measures = (surp, ent, red_ent, sims[x][target_idxs[y]][-1])
                 else:
                     measures = (surp, ent, red_ent, 0)
 

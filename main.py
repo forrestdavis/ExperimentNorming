@@ -129,7 +129,7 @@ def get_sims(target_ids, sent_ids, corpus, model):
     #don't learn
     model.zero_grad()
 
-    target_ids = target_ids[0][:-1].to(device)
+    target_ids = target_ids[0].to(device)
     target_data, target_targets = test_get_batch(target_ids)
     target_data = target_data.unsqueeze(1)
 
@@ -139,7 +139,7 @@ def get_sims(target_ids, sent_ids, corpus, model):
 
     #hidden[0] is hidden; hidden[1] is cell state
     hidden = hidden[0].data
-    layer_1_target = hidden[1].cpu().squeeze()
+    layer_1_target = hidden[-1].cpu().squeeze()
 
     SIMS = []
     
@@ -507,19 +507,19 @@ run_adapt(stim_file, vocab_file, model_files, out_name)
 '''
 
 '''
-stim_file = 'stimuli/RSA_Analysis.xlsx'
+stim_file = 'stimuli/RSA_Analysis_2.xlsx'
 vocab_file = 'models/vocab'
 model_files = glob.glob('models/*.pt')[:1]
 
 header = True
 multisent_flag = True
 filter_file = None
-#filter_file = 'filter'
+filter_file = 'filter'
 verbose = True
 hasSim = True
 only_avg = True
 
 #EXP = run_norming(stim_file, vocab_file, model_files, header, multisent_flag, filter_file, verbose)
 EXP = run_RSA(stim_file, vocab_file, model_files, header, multisent_flag, filter_file, verbose)
-#EXP.save_csv('pilot_UNMULTI_'+stim_file.split('/')[-1], model_files, only_avg, hasSim)
+EXP.save_csv('RSA_2_'+stim_file.split('/')[-1], model_files, only_avg, hasSim)
 '''
