@@ -107,6 +107,28 @@ class Measures:
                 out.append(self.sims[model])
         return out
 
+    def return_blank(self, model_files, only_avg=False, hasSim=False):
+
+        out = ['NULL']
+
+        surp, ent, red_ent, sim = [-1, -1, -1, -1]
+
+        out.append(ent)
+        out.append(red_ent)
+        out.append(surp)
+        if hasSim:
+            out.append(sim)
+
+        if only_avg:
+            return out
+
+        for model in model_files:
+            out.append(-1)
+            out.append(-1)
+            out.append(-1)
+            if hasSim:
+                out.append(-1)
+        return out
 
 class Stim:
 
@@ -210,19 +232,11 @@ class Stim:
 
                 #for each word
                 for z in range(table.shape[1]):
-                    entry = table[x][z]
+                    entry = table[x, z]
                     try:
                         row += entry.return_data(model_files, only_avg)
                     except:
-                        continue
-
-            if len(row) != len(header):
-                y = len(row)
-                for z in range(y, len(header)):
-                    if header[z].split('_')[-2] == 'word':
-                        row.append('NULL')
-                    else:
-                        row.append(-1)
+                        row += entry.return_blank(model_files, only_avg, hasSim)
 
             data.append(row)
 

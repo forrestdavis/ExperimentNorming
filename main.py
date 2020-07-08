@@ -507,7 +507,7 @@ run_adapt(stim_file, vocab_file, model_files, out_name)
 '''
 
 '''
-stim_file = 'stimuli/RSA_Analysis_2.xlsx'
+stim_file = 'stimuli/multi_sent_another2.xlsx'
 vocab_file = 'models/vocab'
 model_files = glob.glob('models/*.pt')[:1]
 
@@ -521,5 +521,5 @@ only_avg = True
 
 #EXP = run_norming(stim_file, vocab_file, model_files, header, multisent_flag, filter_file, verbose)
 EXP = run_RSA(stim_file, vocab_file, model_files, header, multisent_flag, filter_file, verbose)
-EXP.save_csv('RSA_2_'+stim_file.split('/')[-1], model_files, only_avg, hasSim)
+#EXP.save_csv('RSA_2_'+stim_file.split('/')[-1], model_files, only_avg, hasSim)
 '''
