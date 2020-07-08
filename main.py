@@ -173,6 +173,33 @@ def get_sims(target_ids, sent_ids, corpus, model):
 
     return SIMS
 
+def load_RSA_adapt(stim_file, hasHeader=True):
+
+    if hasHeader:
+        EXP = pd.read_excel(stim_file)
+    else:
+        EXP = pd.read_excel(stim_file, header=None)
+
+    header = EXP.columns.values
+
+    baselines = []
+    comps = []
+    sents = []
+    ents = []
+    break_point = len(EXP[header[0]])
+    for x in range(len(header)):
+        for y in EXP[header[x]]:
+            if x == 0 or x == 4:
+                baselines.append(y)
+            elif x == 1 or x == 5:
+                comps.append(y)
+            elif x == 2 or x == 6:
+                sents.append(y)
+            else:
+                ents.append(y)
+
+    return baselines, comps, sents, ents, break_point
+
 def load_adapt(stim_file, hasHeader=True):
 
     if hasHeader:
@@ -220,6 +247,88 @@ def load_model(model_file):
 
     return model
 
+def RSA_adapt(test_file, vocab_file, model_files, has_header):
+
+    #hard code data_dir
+    data_path = './'
+
+    #set loss function to be cross entropy
+    criterion = nn.CrossEntropyLoss()
+
+    baselines, comps, sents, ents, break_point = load_RSA_adapt(test_file, 
+                                                        has_header)
+
+    #backprop during eval
+    torch.backends.cudnn.enabled = False
+
+    # models X sents
+    RSAS = {}
+
+    #Loop through the models
+    for model_file in model_files:
+        print('testing model:', model_file)
+
+        if model_file not in RSAS:
+            RSAS[model_file] = []
+
+        #Create corpus wrapper (this is for one hoting data)
+        corpus = data_test.TestSent(data_path, vocab_file, 
+                sents, False)
+        #Get one hots
+        sent_ids = corpus.get_data()
+
+        #Create corpus wrapper (this is for one hoting data)
+        corpus = data_test.TestSent(data_path, vocab_file, 
+                baselines, False)
+        #Get one hots
+        base_ids = corpus.get_data()
+
+        #Create corpus wrapper (this is for one hoting data)
+        corpus = data_test.TestSent(data_path, vocab_file, 
+                comps, False)
+        #Get one hots
+        comp_ids = corpus.get_data()
+        
+        for i in range(len(sent_ids)):
+
+            #load model 
+            model = load_model(model_file)
+            model.eval()
+
+            sent_id = sent_ids[i].to(device)
+            base_id = base_ids[i].to(device)
+            comp_id = comp_ids[i].to(device)
+
+            #Pre-adapt sim
+            sims = get_sims([base_id], [comp_id], corpus, model)
+            pre_sim = sims[-1][-1][-1]
+            #print(pre_sim)
+
+            #Adapt
+            hidden = model.init_hidden(1)
+            data, targets = test_get_batch(sent_id)
+
+            data = data.unsqueeze(1)
+            output, hidden = model(data, hidden)
+
+            output_flat = output.view(-1, len(corpus.dictionary))
+
+            #backprop
+            loss = criterion(output_flat, targets)
+
+            loss.backward()
+            torch.nn.utils.clip_grad_norm(model.parameters(), 0.25)
+            for param in model.parameters():
+                if param.grad is not None:
+                    param.data.add_(-20, param.grad.data)
+
+            #Get post sim
+            sims = get_sims([base_id], [comp_id], corpus, model)
+            post_sim = sims[-1][-1][-1]
+
+            RSAS[model_file].append((pre_sim, post_sim))
+
+    return RSAS, baselines, comps, sents, ents, break_point
 
 def adapt(test_file, vocab_file, model_files, has_header):
 
@@ -295,6 +404,124 @@ def adapt(test_file, vocab_file, model_files, has_header):
 def get_delta(pre_metrics, post_metrics):
 
     return pre_metrics[-1][1] - post_metrics[-1][1]
+
+def run_RSA_adapt(test_file, vocab_file, model_files,  
+        out_name, has_header = True, only_avg = False, out_type = 'both'):
+
+    #RSAS, sents, ents, break_point = RSA_adapt(test_file, vocab_file, model_files, has_header)
+    RSAS, baselines, comps, sents, ents, break_point = RSA_adapt(
+            test_file, vocab_file, model_files, has_header)
+
+    header_models = []
+    if not only_avg:
+        for model in RSAS:
+            m = model.split('/')[-1] + '_RSA_pre'
+            header_models.append(m)
+            m = model.split('/')[-1] + '_RSA_post'
+            header_models.append(m)
+            m = model.split('/')[-1] + '_RSA_diff'
+            header_models.append(m)
+
+    header_models.append('avg_RSA_pre')
+    header_models.append('avg_RSA_post')
+    header_models.append('avg_RSA_diff')
+
+    header = ['baseline', 'comparison', 'LOW', 'LOW_ENT'] + header_models + ['baseline', 'comparison', 'HIGH', 'HIGH_ENT'] + header_models
+
+    baselines_LOW = baselines[:len(baselines)//2]
+    baselines_HIGH = baselines[len(baselines)//2:]
+
+    comps_LOW = comps[:len(comps)//2]
+    comps_HIGH = comps[len(comps)//2:]
+
+    sents_LOW = sents[:len(sents)//2]
+    sents_HIGH = sents[len(sents)//2:]
+
+    ents_LOW = ents[:len(ents)//2]
+    ents_HIGH = ents[len(ents)//2:]
+
+    assert len(sents_LOW) == break_point
+
+    all_data = []
+    for x in range(len(sents_LOW)):
+        data = []
+
+        pre_lows = []
+        post_lows = []
+        diff_lows = []
+
+        pre_highs = []
+        post_highs = []
+        diff_highs = []
+
+        for model in RSAS:
+            values = RSAS[model]
+
+            pre_low, post_low = values[:len(values)//2][x]
+            pre_high, post_high = values[len(values)//2:][x]
+
+            pre_lows.append(pre_low)
+            post_lows.append(post_low)
+            diff_lows.append(post_low-pre_low)
+
+            pre_highs.append(pre_high)
+            post_highs.append(post_high)
+            diff_highs.append(post_high-pre_high)
+
+        avg_pre_low = sum(pre_lows)/len(pre_lows)
+        avg_post_low = sum(post_lows)/len(post_lows)
+        avg_diff_low = sum(diff_lows)/len(diff_lows)
+
+        avg_pre_high = sum(pre_highs)/len(pre_highs)
+        avg_post_high = sum(post_highs)/len(post_highs)
+        avg_diff_high = sum(diff_highs)/len(diff_highs)
+
+        if not only_avg:
+            data += [baselines_LOW[x], comps_LOW[x], 
+                    sents_LOW[x], ents_LOW[x]]
+            data += pre_lows
+            data += post_lows
+            data += diff_lows
+            data.append(avg_pre_low)
+            data.append(avg_post_low)
+            data.append(avg_diff_low)
+
+            data += [baselines_HIGH[x], comps_HIGH[x], 
+                    sents_HIGH[x], ents_HIGH[x]]
+            data += pre_highs
+            data += post_highs
+            data += diff_highs
+            data.append(avg_pre_high)
+            data.append(avg_post_high)
+            data.append(avg_diff_high)
+
+        else:
+            data += [baselines_LOW[x], comps_LOW[x], 
+                    sents_LOW[x], ents_LOW[x]]
+            data.append(avg_pre_low)
+            data.append(avg_post_low)
+            data.append(avg_diff_low)
+
+            data += [baselines_HIGH[x], comps_HIGH[x], 
+                    sents_HIGH[x], ents_HIGH[x]]
+
+            data.append(avg_pre_high)
+            data.append(avg_post_high)
+            data.append(avg_diff_high)
+
+        all_data.append(data)
+        
+    dataframe = pd.DataFrame(all_data, columns = header) 
+
+    if out_type == 'both':
+        dataframe.to_csv(out_name, index=False)
+        dataframe.to_excel(out_name, index=False)
+
+    elif out_type == 'csv':
+        dataframe.to_csv(out_name, index=False)
+
+    elif out_type == 'xlsx':
+        dataframe.to_excel(out_name, index=False)
 
 def run_adapt(test_file, vocab_file, model_files,  
         out_name, has_header = True, only_avg = False, out_type = 'both'):
@@ -499,11 +726,11 @@ def run_RSA(stim_file, vocab_file, model_files, header=False,
     return EXP
 
 '''
-stim_file = 'stimuli/Book1.xlsx'
+stim_file = 'stimuli/Adapt.xlsx'
 vocab_file = 'models/vocab' 
 out_name = 'Adapt.xlsx'
-model_files = glob.glob('models/*.pt')[:2]
-run_adapt(stim_file, vocab_file, model_files, out_name)
+model_files = glob.glob('models/*.pt')[:1]
+run_RSA_adapt(stim_file, vocab_file, model_files, out_name)
 '''
 
 '''

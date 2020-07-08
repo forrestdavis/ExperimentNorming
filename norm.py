@@ -4,7 +4,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Experiment Stimuli Norming for LSTM Language Model Probing')
 
 parser.add_argument('--exp', type=str, default='IT', 
-                    help='experiment type [IT|RSA|ADAPT]')
+                    help='experiment type [IT|RSA|ADAPT|RSA-ADAPT]')
 
 parser.add_argument('--models', type=str, default='a',
                     help='model to run [a|b|c|d|e|all]')
@@ -91,6 +91,10 @@ elif args.exp == 'RSA':
 
 elif args.exp == 'ADAPT':
     run_adapt(args.stim_file, vocab_file, model_files, output_file, args.has_header, 
+            args.avg, args.file_type)
+
+elif args.exp == 'RSA-ADAPT':
+    run_RSA_adapt(args.stim_file, vocab_file, model_files, output_file, args.has_header, 
             args.avg, args.file_type)
 
 #save output IT|RSA

@@ -27,14 +27,17 @@ runs on all models (--models all), sentences will be treated seperately, and by-
 average output will be saved from IT experiment to results/normed_multi_sent(.xlsx and .csv). 
 
 ### Information on Files
-There are three overarching options, outputing by-word information-theoretic measures only (IT),
-outputting by-word similarity to a baseline and information-theoretic measures (RSA), and 
-one-shot learning a stimuli set (ADAPT). 
+There are four overarching options (or experiments), 
+outputing by-word information-theoretic measures only (IT),
+outputting by-word similarity to a baseline and information-theoretic measures (RSA),
+one-shot learning a stimuli set and output change in surprisal (ADAPT), or 
+one-shot learning a stimuli set and output change in RSA (RSA-ADAPT). 
 
 stimuli file
 * expecting any number of columns, where each column is a sentence, with an optional header  
 * if running RSA the first column will be treated as the baseline
 * if running ADAPT the input format should be SENT1, ENT, SENT2, ENT
+* if running RSA-ADAPT the input format should be BASELINE, COMPARISION, SENT1, ENT, BASELINE, COMPARISON, SENT2, ENT
 
 normed files are saved to results and can be formatted as an excel file or csv. The columns in this
 are, for each sentence (subscripted i, the baseline will be SENT_0 for RSA)
@@ -57,13 +60,35 @@ values for the measures is appended:
 
 For ADAPT the columns are as follows:
 * LOW - First column of sentences from input stimuli file
-* HIGH_ENT - Entropy of verb given in input stimuli file (second column in stimuli file)
+* LOW_ENT - Entropy of verb given in input stimuli file (second column in stimuli file)
 * MODEL_delta - Change in surprisal at the final word after MODEL one-shot learns sentence
 * avg_delta - Average change in surprisal at the final word after each model one-shot learns sentence
 * HIGH - third column of sentences from input stimuli file
 * HIGH_ENT - Entropy of verb given in input stimuli file (fourth column in stimuli file)
 * MODEL_delta - Change in surprisal at the final word after MODEL one-shot learns sentence
 * avg_delta - Average change in surprisal at the final word after each model one-shot learns sentence
+
+For RSA-ADAPT the columns are as follows:
+* BASELINE - First column from input stimuli, is baseline that similarity is calculated for
+* COMPARISON - Second column from input stimuli, is sentence to compare similarity to baseline
+* LOW - Third column of sentences from input stimuli file, sentences to learn from
+* LOW_ENT - Entropy of verb given in input stimuli file (fourth column in stimuli file)
+* MODEL_pre - Similarity prior to learning
+* MODEL_post - Similarity after learning
+* MODEL_diff - Difference between similarity after learning and before learning (positive means greater similarity after one-shot learning)
+* avg_pre - Average similarity prior to learning sentences 
+* avg_post - Average similarity after learning sentences 
+* avg_diff - Average difference in similarity after learning sentences minus prior to learning 
+* BASELINE - Fifth column from input stimuli, is baseline that similarity is calculated for
+* COMPARISON - Sixth column from input stimuli, is sentence to compare similarity to baseline
+* HIGH - Seventh column of sentences from input stimuli file, sentences to learn from
+* HIGH_ENT - Entropy of verb given in input stimuli file (eighth column in stimuli file)
+* MODEL_pre - Similarity prior to learning
+* MODEL_post - Similarity after learning
+* MODEL_diff - Difference between similarity after learning and before learning (positive means greater similarity after one-shot learning)
+* avg_pre - Average similarity prior to learning sentences 
+* avg_post - Average similarity after learning sentences 
+* avg_diff - Average difference in similarity after learning sentences minus prior to learning 
 
 The directory vocab_info includes information about the frequency of words in 
 the training corpora. Including: 
@@ -86,7 +111,7 @@ To run norm.py with non-default settings:
 
     optional arguments:
       -h, --help            show this help message and exit
-      --exp EXP             experiment type [IT|RSA|ADAPT]
+      --exp EXP             experiment type [IT|RSA|ADAPT|RSA-ADAPT]
       --models MODELS       model to run [a|b|c|d|e|all]
       --has_header          Specify if the excel file has a header
       --multi_sent          Specify if you are running multiple sentence stimuli
@@ -100,6 +125,13 @@ To run norm.py with non-default settings:
                             Ouput file name: default is normed_[stim_file_name]
       --file_type FILE_TYPE
                             File type for output: [xlsx|csv|both]
+
+
+
+    usage: norm.py [-h] [--exp EXP] [--models MODELS] [--has_header]
+                   [--multi_sent] [--avg] [--filter FILTER]
+                   [--stim_file STIM_FILE] [--output_file OUTPUT_FILE]
+                   [--file_type FILE_TYPE]
 
 Example run:
         
