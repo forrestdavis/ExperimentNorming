@@ -725,6 +725,22 @@ def run_RSA(stim_file, vocab_file, model_files, header=False,
 
     return EXP
 
+def check_unk(stim_file, vocab_file, header=False, 
+        filter_file=None, verbose=False):
+
+    ''' Given a stimuli file and model vocabulary file 
+    return UNK'd stimuli.'''
+
+    #hard code data_dir
+    data_path = './'
+
+
+    #Load experiments
+    EXP = data.Stim(stim_file, header, filter_file, vocab_file)
+    EXP.check_unks()
+
+    return EXP
+
 '''
 stim_file = 'stimuli/Adapt.xlsx'
 vocab_file = 'models/vocab' 

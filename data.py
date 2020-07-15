@@ -13,6 +13,7 @@
 import re
 import pandas as pd
 import numpy as np
+import sys
 
 class Measures:
 
@@ -175,6 +176,29 @@ class Stim:
 
         self.dataframe.to_csv(fname, index=False)
 
+
+    def check_unks(self):
+
+        header = []
+        for x in range(len(self.SENTS[0])):
+            header.append('SENTS_'+str(x))
+        for x in range(len(self.SENTS[0])):
+            header.append('UNK_SENTS_'+str(x))
+        for x in range(len(self.SENTS[0])):
+            header.append('has_UNK_'+str(x))
+
+        #loop over stimuli
+        data = []
+        for x in range(self.TABLES[0].shape[0]):
+            row = []
+
+            row += self.SENTS[x]
+            row += self.UNK_SENTS[x]
+            row += self.hasUNK[x]
+
+            data.append(row)
+
+        self.dataframe = pd.DataFrame(data, columns = header) 
 
     def create_df(self, model_files, only_avg=False, hasSim=False):
 
@@ -370,7 +394,12 @@ class Stim:
             col_idx = 0
             for col in self.header:
                 
-                sent = self.EXP[col][x].lower().strip()
+                try:
+                    sent = self.EXP[col][x].lower().strip()
+                except:
+                    sys.stderr.write('Columns with numbers will turned into strings and likely UNKd.' + 
+                    ' You should likely delete the offending column.\n')
+                    sent = str(self.EXP[col][x]).lower().strip()
                 sent = sent.replace(',', ' ,').replace('.', ' .')
 
                 SENTS.append(sent)

@@ -4,10 +4,13 @@ import argparse
 parser = argparse.ArgumentParser(description='Experiment Stimuli Norming for LSTM Language Model Probing')
 
 parser.add_argument('--exp', type=str, default='IT', 
-                    help='experiment type [IT|RSA|ADAPT|RSA-ADAPT]')
+                    help='experiment type [IT|RSA|ADAPT|RSA-ADAPT|UNK]')
 
 parser.add_argument('--models', type=str, default='a',
                     help='model to run [a|b|c|d|e|all]')
+
+parser.add_argument('--vocab_file', type=str, default='models/vocab',
+                    help='vocab file')
 
 parser.add_argument('--has_header', action='store_true',
                     help='Specify if the excel file has a header')
@@ -65,7 +68,7 @@ elif args.models == 'e':
 
 model_files.sort()
 
-vocab_file = 'models/vocab'
+#vocab_file = 'models/vocab'
 verbose = True
 
 if args.exp == 'IT':
@@ -83,22 +86,25 @@ else:
 
 #Run experiment
 if args.exp == 'IT':
-    EXP = run_norming(args.stim_file, vocab_file, model_files, args.has_header,
+    EXP = run_norming(args.stim_file, args.vocab_file, model_files, args.has_header,
             args.multi_sent, args.filter, verbose)
 elif args.exp == 'RSA':
-    EXP = run_RSA(args.stim_file, vocab_file, model_files, args.has_header, 
+    EXP = run_RSA(args.stim_file, args.vocab_file, model_files, args.has_header, 
             args.multi_sent, args.filter, verbose)
 
 elif args.exp == 'ADAPT':
-    run_adapt(args.stim_file, vocab_file, model_files, output_file, args.has_header, 
+    run_adapt(args.stim_file, args.vocab_file, model_files, output_file, args.has_header, 
             args.avg, args.file_type)
 
 elif args.exp == 'RSA-ADAPT':
-    run_RSA_adapt(args.stim_file, vocab_file, model_files, output_file, args.has_header, 
+    run_RSA_adapt(args.stim_file, args.vocab_file, model_files, output_file, args.has_header, 
             args.avg, args.file_type)
 
+elif args.exp == 'UNK':
+    EXP = check_unk(args.stim_file, args.vocab_file, args.has_header, args.filter, verbose) 
+
 #save output IT|RSA
-if args.exp == 'IT' or args.exp == 'RSA':
+if args.exp == 'IT' or args.exp == 'RSA' or args.exp == "UNK":
 
     if args.file_type == 'both':
         EXP.save_excel(output_file, model_files, args.avg, hasSim)

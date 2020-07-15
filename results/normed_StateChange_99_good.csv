@@ -1,0 +1,199 @@
+SENTS_0,SENTS_1,UNK_SENTS_0,UNK_SENTS_1,has_UNK_0,has_UNK_1
+the artist will stare at the canvas,1 .25641025641,the artist will stare at the canvas,<unk> <unk>,0,1
+the artist will study the sculpture,1 .225,the artist will study the sculpture,<unk> <unk>,0,1
+the athlete will step over the bench,1 .725,the athlete will step over the bench,<unk> <unk>,0,1
+the aunt will carry the bag,1 .75,the aunt will carry the bag,<unk> <unk>,0,1
+the bandleader will wave the baton,2 .45,the bandleader will wave the baton,<unk> <unk>,0,1
+the bartender will admire the bottle,1 .391304348,the bartender will admire the bottle,<unk> <unk>,0,1
+the bartender will hold the lemon,1 .217391304,the bartender will hold the lemon,<unk> <unk>,0,1
+the beaver will circle the tree,1 .55,the beaver will circle the tree,<unk> <unk>,0,1
+the boxer will approach his opponent,1 .875,the boxer will approach his opponent,<unk> <unk>,0,1
+the boy will appreciate the coin,1 .28205128205,the boy will appreciate the coin,<unk> <unk>,0,1
+the boy will carry the bike,1 .64102564103,the boy will carry the bike,<unk> <unk>,0,1
+the boy will examine his tie,1 .17948717949,the boy will examine his tie,<unk> <unk>,0,1
+the boy will grab the box,1 .94871794872,the boy will grab the box,<unk> <unk>,0,1
+the boy will inspect the kite,1 .25,the boy will inspect the kite,<unk> <unk>,0,1
+the boy will inspect the zipper,1 .30769230769,the boy will inspect the zipper,<unk> <unk>,0,1
+the boy will look at the candle,1 .15,the boy will look at the candle,<unk> <unk>,0,1
+the boy will select the costume,1 .85365853659,the boy will select the costume,<unk> <unk>,0,1
+the boy will shake the bottle,3 .35,the boy will shake the bottle,<unk> <unk>,0,1
+the boy will stretch the sock,3 .51219512195,the boy will stretch the sock,<unk> <unk>,0,1
+the bride will accept the gift,1 .64102564103,the bride will accept the gift,<unk> <unk>,0,1
+the bully will poke the boy,2 .913043478,the bully will poke the boy,<unk> <unk>,0,1
+the butler will trip over the rug,2 .87804878049,the butler will trip over the rug,<unk> <unk>,0,1
+the cashier will clean the register,1 .47826087,the cashier will clean the register,<unk> <unk>,0,1
+the cat will follow the mouse,1 .92307692308,the cat will follow the mouse,<unk> <unk>,0,1
+the chef will season the cabbage,4 .07317073171,the chef will season the cabbage,<unk> <unk>,0,1
+the chef will weigh the mango,1 .82926829268,the chef will weigh the mango,<unk> <unk>,0,1
+the chef will weigh the onion,1 .41025641026,the chef will weigh the onion,<unk> <unk>,0,1
+the child will pet the cat,1 .87179487179,the child will pet the cat,<unk> <unk>,0,1
+the child will tap the bottle,1 .60526315789,the child will tap the bottle,<unk> <unk>,0,1
+the child will touch the figurine,2 .02564102564,the child will touch the figurine,<unk> <unk>,0,1
+the child will wash the bowl,3 .17948717949,the child will wash the bowl,<unk> <unk>,0,1
+the child will wear the glove,2 .19512195122,the child will wear the glove,<unk> <unk>,0,1
+the climber will examine the rope,1 .61538461538,the climber will examine the rope,<unk> <unk>,0,1
+the clown will rub at the balloon,1 .826086957,the clown will rub at the balloon,<unk> <unk>,0,1
+the contractor will measure the pool,1 .38461538462,the contractor will measure the pool,<unk> <unk>,0,1
+the cop will follow the vehicle,1 .89743589744,the cop will follow the vehicle,<unk> <unk>,0,1
+the critic will taste the coffee,2 .51219512195,the critic will taste the coffee,<unk> <unk>,0,1
+the daughter will admire the bracelet,1 .28205128205,the daughter will admire the bracelet,<unk> <unk>,0,1
+the dog will lie beside the homework,1 .58536585366,the dog will lie beside the homework,<unk> <unk>,0,1
+the dog will move the blanket,2 .41025641026,the dog will move the blanket,<unk> <unk>,0,1
+the expert will disperse the puzzle,4 .826086957,the expert will disperse the puzzle,<unk> <unk>,0,1
+the girl will photograph the necklace,1 .260869565,the girl will photograph the necklace,<unk> <unk>,0,1
+the farmer will pet the sheep,2 .12195121951,the farmer will pet the sheep,<unk> <unk>,0,1
+the farmer will select the pumpkin,1 .55,the farmer will select the pumpkin,<unk> <unk>,0,1
+the fireman will grip the hose,2 .2,the fireman will grip the hose,<unk> <unk>,0,1
+the gardener will water the orchid,3 .26829268293,the gardener will water the orchid,<unk> <unk>,0,1
+the girl will accept the rose,1 .87179487179,the girl will accept the rose,<unk> <unk>,0,1
+the girl will feel the shirt,1 .625,the girl will feel the shirt,<unk> <unk>,0,1
+the girl will gaze through the window,1 .39024390244,the girl will gaze through the window,<unk> <unk>,0,1
+the girl will steal the diary,2 .07692307692,the girl will steal the diary,<unk> <unk>,0,1
+the gorilla will inspect the banana,1 .275,the gorilla will inspect the banana,<unk> <unk>,0,1
+the grandfather will clean the basket,3 .38461538462,the grandfather will clean the basket,<unk> <unk>,0,1
+the grandfather will look at the turkey,1 .275,the grandfather will look at the turkey,<unk> <unk>,0,1
+the grandmother will hold the lamp,1 .48717948718,the grandmother will hold the lamp,<unk> <unk>,0,1
+the guide will inspect the umbrella,2 .0243902439,the guide will inspect the umbrella,<unk> <unk>,0,1
+the hunter will inspect the rifle,1 .47368421053,the hunter will inspect the rifle,<unk> <unk>,0,1
+the hyena will follow the wildebeest,2 .12820512821,the hyena will follow the wildebeest,<unk> <unk>,0,1
+the illustrator will display the comic,1 .25,the illustrator will display the comic,<unk> <unk>,0,1
+the landlord will knock at the door,1 .38461538462,the landlord will knock at the door,<unk> <unk>,0,1
+the librarian will look at the book,1 .20512820513,the librarian will look at the book,<unk> <unk>,0,1
+the maid will sit on the bed,2 .20512820513,the maid will sit on the bed,<unk> <unk>,0,1
+the man will cut the cigar,4 .31578947368,the man will cut the cigar,<unk> <unk>,0,1
+the man will find the phone,2 .29268292683,the man will find the phone,<unk> <unk>,0,1
+the man will insure the car,1 .825,the man will insure the car,<unk> <unk>,0,1
+the man will kick the gate,2 .97435897436,the man will kick the gate,<unk> <unk>,0,1
+the man will lick the envelope,2 .84615384615,the man will lick the envelope,<unk> <unk>,0,1
+the man will point to the label,1 .58536585366,the man will point to the label,<unk> <unk>,0,1
+the man will cite the paper,1 .958333333,the man will cite the paper,<unk> <unk>,0,1
+the man will wash the peach,2 .43902439024,the man will wash the peach,<unk> <unk>,0,1
+the marketer will browse the catalog,1 .69230769231,the marketer will browse the catalog,<unk> <unk>,0,1
+the mechanic will examine the engine,1 .5641025641,the mechanic will examine the engine,<unk> <unk>,0,1
+the mother will select the egg,1 .833333333,the mother will select the egg,<unk> <unk>,0,1
+the musician will examine the saxophone,1 .23076923077,the musician will examine the saxophone,<unk> <unk>,0,1
+the musician will play the piano,2 .48717948718,the musician will play the piano,<unk> <unk>,0,1
+the paleontologist will dig around the fossil,2 .84615384615,the paleontologist will dig around the fossil,<unk> <unk>,0,1
+the pilot will steer the airplane,3 .05128205128,the pilot will steer the airplane,<unk> <unk>,0,1
+the plumber will examine the pipe,1 .7,the plumber will examine the pipe,<unk> <unk>,0,1
+the sailor will hold the sail,2 .31707317073,the sailor will hold the sail,<unk> <unk>,0,1
+the secretary will type on the keyboard,2 .10256410256,the secretary will type on the keyboard,<unk> <unk>,0,1
+the student will admire the backpack,1 .125,the student will admire the backpack,<unk> <unk>,0,1
+the student will hang the poster,2 .34210526316,the student will hang the poster,<unk> <unk>,0,1
+the student will sit at the computer,1 .64102564103,the student will sit at the computer,<unk> <unk>,0,1
+the teacher will glare at the paper,1 .3,the teacher will glare at the paper,<unk> <unk>,0,1
+the teacher will point at the blackboard,1 .56097560976,the teacher will point at the blackboard,<unk> <unk>,0,1
+the toddler will examine the puzzle,1 .38461538462,the toddler will examine the puzzle,<unk> <unk>,0,1
+the trainer will pet the horse,2 .02631578947,the trainer will pet the horse,<unk> <unk>,0,1
+the waiter will polish the spoon,3 .20512820513,the waiter will polish the spoon,<unk> <unk>,0,1
+the waitress will polish the plate,3 .38461538462,the waitress will polish the plate,<unk> <unk>,0,1
+the woman will apply the lipstick,3 .38461538462,the woman will apply the lipstick,<unk> <unk>,0,1
+the woman will inspect the cello,1 .20512820513,the woman will inspect the cello,<unk> <unk>,0,1
+the woman will look into the crib,1 .70731707317,the woman will look into the crib,<unk> <unk>,0,1
+the woman will feel the sofa,1 .375,the woman will feel the sofa,<unk> <unk>,0,1
+the woman will select the apple,1 .8,the woman will select the apple,<unk> <unk>,0,1
+the woman will wash the cup,3 .10256410256,the woman will wash the cup,<unk> <unk>,0,1
+the woman will wash the plum,2 .82051282051,the woman will wash the plum,<unk> <unk>,0,1
+the woman will wash the potato,2 .71794871795,the woman will wash the potato,<unk> <unk>,0,1
+the woman will wear the blouse,2 .125,the woman will wear the blouse,<unk> <unk>,0,1
+the worker will clean the brick,3 .46153846154,the worker will clean the brick,<unk> <unk>,0,1
+the worker will dust the shelf,4 .0,the worker will dust the shelf,<unk> <unk>,0,1
+the artist will paint on the canvas,5 .60975609756,the artist will paint on the canvas,<unk> <unk>,0,1
+the artist will finish the sculpture,5 .64102564103,the artist will finish the sculpture,<unk> <unk>,0,1
+the athlete will move the bench,2 .64102564103,the athlete will move the bench,<unk> <unk>,0,1
+the aunt will rip the bag,5 .28205128205,the aunt will rip the bag,<unk> <unk>,0,1
+the bandleader will snap the baton,4 .71794871795,the bandleader will snap the baton,<unk> <unk>,0,1
+the bartender will pour the bottle,3 .416666667,the bartender will pour the bottle,<unk> <unk>,0,1
+the bartender will peel the lemon,5 .291666667,the bartender will peel the lemon,<unk> <unk>,0,1
+the beaver will chew through the tree,5 .97297297297,the beaver will chew through the tree,<unk> <unk>,0,1
+the boxer will punch his opponent,4 .4358974359,the boxer will punch his opponent,<unk> <unk>,0,1
+the boy will spin the coin,2 .0487804878,the boy will spin the coin,<unk> <unk>,0,1
+the boy will paint the bike,4 .80487804878,the boy will paint the bike,<unk> <unk>,0,1
+the boy will undo his tie,3 .65853658537,the boy will undo his tie,<unk> <unk>,0,1
+the boy will open the box,3 .65,the boy will open the box,<unk> <unk>,0,1
+the boy will repair the kite,4 .71794871795,the boy will repair the kite,<unk> <unk>,0,1
+the boy will fix the zipper,4 .425,the boy will fix the zipper,<unk> <unk>,0,1
+the boy will extinguish the candle,3 .76923076923,the boy will extinguish the candle,<unk> <unk>,0,1
+the boy will tear the costume,5 .20512820513,the boy will tear the costume,<unk> <unk>,0,1
+the boy will fill the bottle,3 .53846153846,the boy will fill the bottle,<unk> <unk>,0,1
+the boy will tear the sock,5 .35897435897,the boy will tear the sock,<unk> <unk>,0,1
+the bride will open the gift,3 .9756097561,the bride will open the gift,<unk> <unk>,0,1
+the bully will trip the boy,3 .791666667,the bully will trip the boy,<unk> <unk>,0,1
+the butler will stain the rug,5 .07692307692,the butler will stain the rug,<unk> <unk>,0,1
+the cashier will open the register,3 .0,the cashier will open the register,<unk> <unk>,0,1
+the cat will kill the mouse,6 .45,the cat will kill the mouse,<unk> <unk>,0,1
+the chef will fry the cabbage,5 .05128205128,the chef will fry the cabbage,<unk> <unk>,0,1
+the chef will blend the mango,5 .92307692308,the chef will blend the mango,<unk> <unk>,0,1
+the chef will chop the onion,5 .7,the chef will chop the onion,<unk> <unk>,0,1
+the child will wash the cat,3 .74358974359,the child will wash the cat,<unk> <unk>,0,1
+the child will open the bottle,3 .41463414634,the child will open the bottle,<unk> <unk>,0,1
+the child will smash the figurine,6 .4,the child will smash the figurine,<unk> <unk>,0,1
+the child will chip the bowl,4 .19512195122,the child will chip the bowl,<unk> <unk>,0,1
+the child will rip the glove,5 .17948717949,the child will rip the glove,<unk> <unk>,0,1
+the climber will cut the rope,5 .25,the climber will cut the rope,<unk> <unk>,0,1
+the clown will inflate the balloon,4 .5,the clown will inflate the balloon,<unk> <unk>,0,1
+the contractor will drain the pool,4 .925,the contractor will drain the pool,<unk> <unk>,0,1
+the cop will stop the vehicle,3 .24390243902,the cop will stop the vehicle,<unk> <unk>,0,1
+the critic will finish the coffee,4 .82051282051,the critic will finish the coffee,<unk> <unk>,0,1
+the daughter will loosen the bracelet,3 .025,the daughter will loosen the bracelet,<unk> <unk>,0,1
+the dog will destroy the homework,6 .34210526316,the dog will destroy the homework,<unk> <unk>,0,1
+the dog will rip the blanket,5 .425,the dog will rip the blanket,<unk> <unk>,0,1
+the expert will build the puzzle,5 .458333333,the expert will build the puzzle,<unk> <unk>,0,1
+the girl will shorten the necklace,nan,the girl will shorten the necklace,<unk>,0,1
+the farmer will shear the sheep,4 .69230769231,the farmer will shear the sheep,<unk> <unk>,0,1
+the farmer will carve the pumpkin,5 .51282051282,the farmer will carve the pumpkin,<unk> <unk>,0,1
+the fireman will unravel the hose,2 .87179487179,the fireman will unravel the hose,<unk> <unk>,0,1
+the gardener will trim the orchid,4 .58974358974,the gardener will trim the orchid,<unk> <unk>,0,1
+the girl will cut the rose,4 .95,the girl will cut the rose,<unk> <unk>,0,1
+the girl will hang the shirt,2 .0,the girl will hang the shirt,<unk> <unk>,0,1
+the girl will open the window,2 .89743589744,the girl will open the window,<unk> <unk>,0,1
+the girl will write in the diary,3 .75609756098,the girl will write in the diary,<unk> <unk>,0,1
+the gorilla will peel the banana,4 .20512820513,the gorilla will peel the banana,<unk> <unk>,0,1
+the grandfather will repair the basket,5 .025,the grandfather will repair the basket,<unk> <unk>,0,1
+the grandfather will cut the turkey,4 .86842105263,the grandfather will cut the turkey,<unk> <unk>,0,1
+the grandmother will break the lamp,6 .4,the grandmother will break the lamp,<unk> <unk>,0,1
+the guide will open the umbrella,3 .4358974359,the guide will open the umbrella,<unk> <unk>,0,1
+the hunter will load the rifle,3 .725,the hunter will load the rifle,<unk> <unk>,0,1
+the hyena will catch the wildebeest,4 .6,the hyena will catch the wildebeest,<unk> <unk>,0,1
+the illustrator will sketch the comic,3 .869565217,the illustrator will sketch the comic,<unk> <unk>,0,1
+the landlord will paint the door,5 .0,the landlord will paint the door,<unk> <unk>,0,1
+the librarian will open the book,2 .46341463415,the librarian will open the book,<unk> <unk>,0,1
+the maid will make the bed,3 .9756097561,the maid will make the bed,<unk> <unk>,0,1
+the man will smoke the cigar,4 .82926829268,the man will smoke the cigar,<unk> <unk>,0,1
+the man will drop the phone,3 .33333333333,the man will drop the phone,<unk> <unk>,0,1
+the man will dent the car,5 .21052631579,the man will dent the car,<unk> <unk>,0,1
+the man will shut the gate,3 .625,the man will shut the gate,<unk> <unk>,0,1
+the man will open the envelope,3 .85365853659,the man will open the envelope,<unk> <unk>,0,1
+the man will remove the label,3 .71794871795,the man will remove the label,<unk> <unk>,0,1
+the man will fold the paper,2 .869565217,the man will fold the paper,<unk> <unk>,0,1
+the man will slice the peach,4 .76923076923,the man will slice the peach,<unk> <unk>,0,1
+the marketer will edit the catalog,4 .425,the marketer will edit the catalog,<unk> <unk>,0,1
+the mechanic will dismantle the engine,5 .9,the mechanic will dismantle the engine,<unk> <unk>,0,1
+the mother will beat the egg,5 .695652174,the mother will beat the egg,<unk> <unk>,0,1
+the musician will drop the saxophone,3 .85365853659,the musician will drop the saxophone,<unk> <unk>,0,1
+the musician will tune the piano,4 .2,the musician will tune the piano,<unk> <unk>,0,1
+the paleontologist will uncover the fossil,3 .48780487805,the paleontologist will uncover the fossil,<unk> <unk>,0,1
+the pilot will land the airplane,3 .35,the pilot will land the airplane,<unk> <unk>,0,1
+the plumber will bend the pipe,5 .0,the plumber will bend the pipe,<unk> <unk>,0,1
+the sailor will lower the sail,3 .51282051282,the sailor will lower the sail,<unk> <unk>,0,1
+the secretary will attach the keyboard,3 .17073170732,the secretary will attach the keyboard,<unk> <unk>,0,1
+the student will fill the backpack,4 .0,the student will fill the backpack,<unk> <unk>,0,1
+the student will write on the poster,4 .31707317073,the student will write on the poster,<unk> <unk>,0,1
+the student will start the computer,3 .5,the student will start the computer,<unk> <unk>,0,1
+the teacher will mark the paper,3 .79487179487,the teacher will mark the paper,<unk> <unk>,0,1
+the teacher will draw on the blackboard,3 .82051282051,the teacher will draw on the blackboard,<unk> <unk>,0,1
+the toddler will ruin the puzzle,4 .45,the toddler will ruin the puzzle,<unk> <unk>,0,1
+the trainer will saddle the horse,3 .05,the trainer will saddle the horse,<unk> <unk>,0,1
+the waiter will bend the spoon,4 .825,the waiter will bend the spoon,<unk> <unk>,0,1
+the waitress will crack the plate,5 .55,the waitress will crack the plate,<unk> <unk>,0,1
+the woman will break the lipstick,5 .0,the woman will break the lipstick,<unk> <unk>,0,1
+the woman will tune the cello,3 .70731707317,the woman will tune the cello,<unk> <unk>,0,1
+the woman will collapse the crib,4 .23076923077,the woman will collapse the crib,<unk> <unk>,0,1
+the woman will clean the sofa,3 .782608696,the woman will clean the sofa,<unk> <unk>,0,1
+the woman will bite the apple,4 .71794871795,the woman will bite the apple,<unk> <unk>,0,1
+the woman will chip the cup,4 .07317073171,the woman will chip the cup,<unk> <unk>,0,1
+the woman will bite the plum,4 .675,the woman will bite the plum,<unk> <unk>,0,1
+the woman will peel the potato,4 .64102564103,the woman will peel the potato,<unk> <unk>,0,1
+the woman will dye the blouse,5 .61538461538,the woman will dye the blouse,<unk> <unk>,0,1
+the worker will paint the brick,4 .725,the worker will paint the brick,<unk> <unk>,0,1
+the worker will paint the shelf,4 .434782609,the worker will paint the shelf,<unk> <unk>,0,1
