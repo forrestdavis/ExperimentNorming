@@ -27,11 +27,12 @@ runs on all models (--models all), sentences will be treated seperately, and by-
 average output will be saved from IT experiment to results/normed_multi_sent(.xlsx and .csv). 
 
 ### Information on Files
-There are four overarching options (or experiments), 
+There are five overarching options (or experiments), 
 outputing by-word information-theoretic measures only (IT),
 outputting by-word similarity to a baseline and information-theoretic measures (RSA),
-one-shot learning a stimuli set and output change in surprisal (ADAPT), or 
-one-shot learning a stimuli set and output change in RSA (RSA-ADAPT). 
+one-shot learning a stimuli set and output change in surprisal (ADAPT), 
+one-shot learning a stimuli set and output change in RSA (RSA-ADAPT), 
+or checking a stimuli for UNKs (UNK). 
 
 stimuli file
 * expecting any number of columns, where each column is a sentence, with an optional header  
@@ -102,8 +103,8 @@ The stimuli directory houses excel files with the data in the experiment.
 
 To run norm.py with non-default settings:
 
-    usage: norm.py [-h] [--exp EXP] [--models MODELS] [--has_header]
-                   [--multi_sent] [--avg] [--filter FILTER]
+    usage: norm.py [-h] [--exp EXP] [--models MODELS] [--vocab_file VOCAB_FILE]
+                   [--has_header] [--multi_sent] [--avg] [--filter FILTER]
                    [--stim_file STIM_FILE] [--output_file OUTPUT_FILE]
                    [--file_type FILE_TYPE]
 
@@ -111,8 +112,10 @@ To run norm.py with non-default settings:
 
     optional arguments:
       -h, --help            show this help message and exit
-      --exp EXP             experiment type [IT|RSA|ADAPT|RSA-ADAPT]
+      --exp EXP             experiment type [IT|RSA|ADAPT|RSA-ADAPT|UNK]
       --models MODELS       model to run [a|b|c|d|e|all]
+      --vocab_file VOCAB_FILE
+                            vocab file
       --has_header          Specify if the excel file has a header
       --multi_sent          Specify if you are running multiple sentence stimuli
                             (only for IT|RSA)
@@ -125,13 +128,6 @@ To run norm.py with non-default settings:
                             Ouput file name: default is normed_[stim_file_name]
       --file_type FILE_TYPE
                             File type for output: [xlsx|csv|both]
-
-
-
-    usage: norm.py [-h] [--exp EXP] [--models MODELS] [--has_header]
-                   [--multi_sent] [--avg] [--filter FILTER]
-                   [--stim_file STIM_FILE] [--output_file OUTPUT_FILE]
-                   [--file_type FILE_TYPE]
 
 Example run:
         

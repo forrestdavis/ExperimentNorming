@@ -79,6 +79,8 @@ else:
 if args.output_file is '':
     if args.avg:
         output_file = 'results/normed_avg_'+args.stim_file.split('/')[-1]
+    elif args.exp == 'UNK':
+        output_file = 'results/normed_UNKs_'+args.stim_file.split('/')[-1]
     else:
         output_file = 'results/normed_'+args.stim_file.split('/')[-1]
 else:
