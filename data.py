@@ -336,7 +336,7 @@ class Stim:
 
                 surp = IT_word[1]
                 try:
-                    ent = IT[target_idxs[y+1]][-1]
+                    ent = IT[target_idxs[y]+1][-1]
                 except:
                     ent = 0
                 red_ent = max(IT_word[-1]-ent, 0)
