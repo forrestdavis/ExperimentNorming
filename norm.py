@@ -7,7 +7,7 @@ parser.add_argument('--exp', type=str, default='IT',
                     help='experiment type [IT|RSA|ADAPT|RSA-ADAPT|UNK]')
 
 parser.add_argument('--models', type=str, default='a',
-                    help='model to run [a|b|c|d|e|all]')
+                    help='model to run [a|b|c|d|e|all|big]')
 
 parser.add_argument('--vocab_file', type=str, default='models/vocab',
                     help='vocab file')
@@ -54,17 +54,22 @@ device = torch.device('cpu')
 criterion = nn.CrossEntropyLoss()
 
 #Get pretrained model files
-model_files = glob.glob('./models/*.pt')
-if args.models == 'a':
-    model_files = list(filter(lambda x: '_a_' in x, model_files))[:1]
-elif args.models == 'b':
-    model_files = list(filter(lambda x: '_b_' in x, model_files))[:1]
-elif args.models == 'c':
-    model_files = list(filter(lambda x: '_c_' in x, model_files))[:1]
-elif args.models == 'd':
-    model_files = list(filter(lambda x: '_d_' in x, model_files))[:1]
-elif args.models == 'e':
-    model_files = list(filter(lambda x: '_e_' in x, model_files))[:1]
+if args.models == 'big':
+    model_files = glob.glob('./large_models/*.pt')
+    args.vocab_file = './large_models/wikitext103_vocab'
+
+else:
+    model_files = glob.glob('./models/*.pt')
+    if args.models == 'a':
+        model_files = list(filter(lambda x: '_a_' in x, model_files))[:1]
+    elif args.models == 'b':
+        model_files = list(filter(lambda x: '_b_' in x, model_files))[:1]
+    elif args.models == 'c':
+        model_files = list(filter(lambda x: '_c_' in x, model_files))[:1]
+    elif args.models == 'd':
+        model_files = list(filter(lambda x: '_d_' in x, model_files))[:1]
+    elif args.models == 'e':
+        model_files = list(filter(lambda x: '_e_' in x, model_files))[:1]
 
 model_files.sort()
 

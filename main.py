@@ -21,9 +21,9 @@ import numpy as np
 import pandas as pd
 
 #set device to cpu if working on laptop :)
-device = torch.device('cpu')
+#device = torch.device('cpu')
 #set device to cpu if working on desktop :))))
-#device = torch.device("cuda:0")
+device = torch.device("cuda:0")
 
 #set loss function to be cross entropy
 criterion = nn.CrossEntropyLoss()
@@ -241,9 +241,14 @@ def load_model(model_file):
             output, hidden = model(data, hidden)
         #Problem with diff versions of torch
         except:
-            new_model = m.RNNModel('LSTM', 28439, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-            new_model.load_state_dict(model.state_dict())
-            model = new_model
+            try:
+                new_model = m.RNNModel('LSTM', 28439, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                new_model.load_state_dict(model.state_dict())
+                model = new_model
+            except:
+                new_model = m.RNNModel('LSTM', 50002, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                new_model.load_state_dict(model.state_dict())
+                model = new_model
 
     return model
 
@@ -633,9 +638,14 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
                 output, hidden = model(data, hidden)
             #Problem with diff versions of torch
             except:
-                new_model = m.RNNModel('LSTM', 28439, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                new_model.load_state_dict(model.state_dict())
-                model = new_model
+                try:
+                    new_model = m.RNNModel('LSTM', 28439, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                    new_model.load_state_dict(model.state_dict())
+                    model = new_model
+                except:
+                    new_model = m.RNNModel('LSTM', 50002, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                    new_model.load_state_dict(model.state_dict())
+                    model = new_model
 
         #loop through experimental items for EXP
         for x in range(len(EXP.UNK_SENTS)):
@@ -694,9 +704,14 @@ def run_RSA(stim_file, vocab_file, model_files, header=False,
                 output, hidden = model(data, hidden)
             #Problem with diff versions of torch
             except:
-                new_model = m.RNNModel('LSTM', 28439, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                new_model.load_state_dict(model.state_dict())
-                model = new_model
+                try:
+                    new_model = m.RNNModel('LSTM', 28439, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                    new_model.load_state_dict(model.state_dict())
+                    model = new_model
+                except:
+                    new_model = m.RNNModel('LSTM', 50002, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                    new_model.load_state_dict(model.state_dict())
+                    model = new_model
 
         #loop through experimental items for EXP
         for x in range(len(EXP.UNK_SENTS)):
