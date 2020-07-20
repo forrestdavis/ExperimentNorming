@@ -21,9 +21,9 @@ import numpy as np
 import pandas as pd
 
 #set device to cpu if working on laptop :)
-#device = torch.device('cpu')
+device = torch.device('cpu')
 #set device to cpu if working on desktop :))))
-device = torch.device("cuda:0")
+#device = torch.device("cuda:0")
 
 #set loss function to be cross entropy
 criterion = nn.CrossEntropyLoss()
