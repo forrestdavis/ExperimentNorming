@@ -296,14 +296,16 @@ class Stim:
                 new_sims = []
                 sents = [] 
                 sent_idx = 1
+                length = len(self.UNK_SENTS[item_idx][sent_idx].split(' '))
                 end = self.UNK_SENTS[item_idx][sent_idx].split(' ')[-1]
                 sent = [] 
                 new_sim = [] 
+                count = 1
                 for y in range(len(values[0])):
                     v = values[0][y]
                     new_sim.append(sims[0][y])
                     sent.append(v)
-                    if v[0] == end:
+                    if v[0] == end and count%length == 0:
                         new_sims.append(new_sim)
                         sents.append(sent)
                         sent_idx += 1
@@ -311,8 +313,12 @@ class Stim:
                             continue
 
                         end = self.UNK_SENTS[item_idx][sent_idx].split(' ')[-1]
+                        length = len(self.UNK_SENTS[item_idx][sent_idx].split(' '))
+                        count = 0
                         sent = []
                         new_sim = []
+
+                    count += 1
 
                 values = sents
                 sims = new_sims
@@ -340,6 +346,14 @@ class Stim:
                         sent = []
 
                 values = sents
+
+        #assert everything is good
+        for z in range(len(values)):
+            og_sent = self.UNK_SENTS[item_idx][z]
+            if not values[z]:
+                continue
+            t_sent = ' '.join(list(map(lambda x: x[0], values[z])))
+            assert og_sent == t_sent
 
         #add to tables
         for x in range(len(self.TABLES)):
