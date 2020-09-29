@@ -52,6 +52,28 @@ class Measures:
 
     def get_avgs(self):
 
+        '''
+        if type(self.surps.values) != list:
+            num_surps = 1
+        else:
+            num_surps = len(self.surps.values())
+
+        if type(self.ents.values) != list:
+            num_ents = 1
+        else:
+            num_ents = len(self.ents.values())
+
+        if type(self.red_ents.values) != list:
+            num_red_ents = 1
+        else:
+            num_red_ents = len(self.red_ents.values())
+
+        if type(self.sims.values) != list:
+            num_sims = 1
+        else:
+            num_sims = len(self.sims.values())
+        '''
+
         surp = sum(self.surps.values())/len(self.surps.values())
         ent = sum(self.ents.values())/len(self.ents.values())
         red_ent = sum(self.red_ents.values())/len(self.red_ents.values())
@@ -85,8 +107,7 @@ class Measures:
         out_str = ','.join(out)
         print(out_str)
 
-    def return_data(self, model_files, only_avg=False):
-
+    def return_data(self, model_files, only_avg=False): 
         out = [self.word]
 
         surp, ent, red_ent, sim = self.get_avgs()
@@ -257,6 +278,7 @@ class Stim:
                 #for each word
                 for z in range(table.shape[1]):
                     entry = table[x, z]
+                    #entry.print()
                     try:
                         row += entry.return_data(model_files, only_avg)
                     except:
@@ -401,6 +423,8 @@ class Stim:
                     ' You should likely delete the offending column.\n')
                     sent = str(self.EXP[col][x]).lower().strip()
                 sent = sent.replace(',', ' ,').replace('.', ' .')
+                #if '.' not in sent:
+                #    sent += ' .'
 
                 SENTS.append(sent)
 

@@ -7,7 +7,7 @@ parser.add_argument('--exp', type=str, default='IT',
                     help='experiment type [IT|RSA|ADAPT|RSA-ADAPT|UNK]')
 
 parser.add_argument('--models', type=str, default='a',
-                    help='model to run [a|b|c|d|e|all|big]')
+                    help='model to run [a|b|c|d|e|all|big|web|bert]')
 
 parser.add_argument('--vocab_file', type=str, default='models/vocab',
                     help='vocab file')
@@ -58,6 +58,15 @@ if args.models == 'big':
     model_files = glob.glob('./large_models/*.pt')
     args.vocab_file = './large_models/wikitext103_vocab'
 
+elif args.models == 'web':
+    model_files = glob.glob('./web_models/*.pt')
+    args.vocab_file = './web_models/openwebtext.vocab'
+
+#dummy
+elif args.models == 'bert':
+    model_files = ['bert-uncased']
+    args.vocab_file = 'bert_vocab'
+
 else:
     model_files = glob.glob('./models/*.pt')
     if args.models == 'a':
@@ -95,9 +104,15 @@ else:
 if args.exp == 'IT':
     EXP = run_norming(args.stim_file, args.vocab_file, model_files, args.has_header,
             args.multi_sent, args.filter, verbose)
+
 elif args.exp == 'RSA':
-    EXP = run_RSA(args.stim_file, args.vocab_file, model_files, args.has_header, 
-            args.multi_sent, args.filter, verbose)
+    if args.models == 'bert':
+        import bert
+        layer = 11
+        EXP = bert.run_BERT_RSA(args.stim_file, layer, args.has_header)
+    else:
+        EXP = run_RSA(args.stim_file, args.vocab_file, model_files, args.has_header, 
+                args.multi_sent, args.filter, verbose)
 
 elif args.exp == 'ADAPT':
     run_adapt(args.stim_file, args.vocab_file, model_files, output_file, args.has_header, 

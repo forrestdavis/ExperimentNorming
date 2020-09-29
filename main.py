@@ -21,9 +21,9 @@ import numpy as np
 import pandas as pd
 
 #set device to cpu if working on laptop :)
-device = torch.device('cpu')
+#device = torch.device('cpu')
 #set device to cpu if working on desktop :))))
-#device = torch.device("cuda:0")
+device = torch.device("cuda:0")
 
 #set loss function to be cross entropy
 criterion = nn.CrossEntropyLoss()
@@ -167,7 +167,10 @@ def get_sims(target_ids, sent_ids, corpus, model):
             h = hidden[0].data
             layer_1 = h[1].cpu().squeeze()
 
-            sim = np.corrcoef(layer_1_target, layer_1)[0, 1]
+            #sim = np.corrcoef(layer_1_target, layer_1)[0, 1]
+            cos_sim = nn.CosineSimilarity(dim=0)
+            sim = cos_sim(layer_1_target, layer_1).item()
+
             sims.append((input_word, sim))
         SIMS.append(sims)
 
@@ -246,9 +249,16 @@ def load_model(model_file):
                 new_model.load_state_dict(model.state_dict())
                 model = new_model
             except:
-                new_model = m.RNNModel('LSTM', 50002, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                new_model.load_state_dict(model.state_dict())
-                model = new_model
+                try: 
+                    new_model = m.RNNModel('LSTM', 50002, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                    new_model.load_state_dict(model.state_dict())
+                    model = new_model
+
+                #dumb me kept <num> in vocab *sigh*
+                except:
+                    new_model = m.RNNModel('LSTM', 50003, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                    new_model.load_state_dict(model.state_dict())
+                    model = new_model
 
     return model
 
@@ -643,9 +653,15 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
                     new_model.load_state_dict(model.state_dict())
                     model = new_model
                 except:
-                    new_model = m.RNNModel('LSTM', 50002, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                    new_model.load_state_dict(model.state_dict())
-                    model = new_model
+                    try:
+                        new_model = m.RNNModel('LSTM', 50002, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                        new_model.load_state_dict(model.state_dict())
+                        model = new_model
+                    #dumb me kept <num> in vocab *sigh*
+                    except:
+                        new_model = m.RNNModel('LSTM', 50003, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                        new_model.load_state_dict(model.state_dict())
+                        model = new_model
 
         #loop through experimental items for EXP
         for x in range(len(EXP.UNK_SENTS)):
@@ -709,9 +725,16 @@ def run_RSA(stim_file, vocab_file, model_files, header=False,
                     new_model.load_state_dict(model.state_dict())
                     model = new_model
                 except:
-                    new_model = m.RNNModel('LSTM', 50002, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                    new_model.load_state_dict(model.state_dict())
-                    model = new_model
+                    try:
+                        new_model = m.RNNModel('LSTM', 50002, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                        new_model.load_state_dict(model.state_dict())
+                        model = new_model
+                    #dumb me kept <num> in vocab *sigh*
+                    except:
+                        new_model = m.RNNModel('LSTM', 50003, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
+                        new_model.load_state_dict(model.state_dict())
+                        model = new_model
+
 
         #loop through experimental items for EXP
         for x in range(len(EXP.UNK_SENTS)):

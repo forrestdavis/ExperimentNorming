@@ -113,7 +113,7 @@ To run norm.py with non-default settings:
     optional arguments:
       -h, --help            show this help message and exit
       --exp EXP             experiment type [IT|RSA|ADAPT|RSA-ADAPT|UNK]
-      --models MODELS       model to run [a|b|c|d|e|all]
+      --models MODELS       model to run [a|b|c|d|e|all|big|web|bert]
       --vocab_file VOCAB_FILE
                             vocab file
       --has_header          Specify if the excel file has a header
@@ -129,6 +129,7 @@ To run norm.py with non-default settings:
       --file_type FILE_TYPE
                             File type for output: [xlsx|csv|both]
 
+
 Example run:
         
         norm.py --exp RSA --models all --stim_file stimuli/RSA_Analysis.xlsx --file_type xlsx --has_header --multi_sent --avg --filter
@@ -141,6 +142,9 @@ in an xlsx file called normed_RSA_Analysis.xlsx. By specifiying --models all and
 --avg, the output will be only the average values for that word across the models.  
 Additionally running norm.py with --avg without
 specifying and output file will append avg to the file name in results (normed_avg_RSA_Analysis.xlsx).
+
+To run with the larger Wikipedia models or the Web models, download them from [here](https://zenodo.org/record/4053572#.X3OKrHaYU5k) and rename the directory
+large_models and web_models, respectively. 
 
 The flags filter and multi_sent only apply to the IT and RSA experiments. 
 
