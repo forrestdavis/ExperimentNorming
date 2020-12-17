@@ -231,9 +231,11 @@ def load_model(model_file):
         model = torch.load(f, map_location='cpu')
 
         # make in continous chunk of memory for speed
+        '''
         if isinstance(model, torch.nn.DataParallel):
             model = model.module
         model.rnn.flatten_parameters()
+        '''
 
         #Check we have the correct version
         try:
@@ -260,6 +262,7 @@ def load_model(model_file):
                     new_model.load_state_dict(model.state_dict())
                     model = new_model
 
+    model.eval()
     return model
 
 def RSA_adapt(test_file, vocab_file, model_files, has_header):
@@ -635,9 +638,11 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
             model = torch.load(f, map_location='cpu')
 
             # make in continous chunk of memory for speed
+            '''
             if isinstance(model, torch.nn.DataParallel):
                 model = model.module
             model.rnn.flatten_parameters()
+            '''
 
             #Check we have the correct version
             try:
@@ -694,7 +699,7 @@ def run_RSA(stim_file, vocab_file, model_files, header=False,
     criterion = nn.CrossEntropyLoss()
 
     #Load experiments
-    EXP = data.Stim(stim_file, header, filter_file)
+    EXP = data.Stim(stim_file, header, filter_file, vocab_file)
 
     #Loop through the models
     for model_file in model_files:
@@ -707,9 +712,11 @@ def run_RSA(stim_file, vocab_file, model_files, header=False,
             model = torch.load(f, map_location='cpu')
 
             # make in continous chunk of memory for speed
+            '''
             if isinstance(model, torch.nn.DataParallel):
                 model = model.module
             model.rnn.flatten_parameters()
+            '''
 
             #Check we have the correct version
             try:
@@ -736,6 +743,7 @@ def run_RSA(stim_file, vocab_file, model_files, header=False,
                         model = new_model
 
 
+        model.eval()
         #loop through experimental items for EXP
         for x in range(len(EXP.UNK_SENTS)):
             sentences = list(EXP.UNK_SENTS[x])

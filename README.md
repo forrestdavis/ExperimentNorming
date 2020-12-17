@@ -16,6 +16,12 @@ From spaCy you need the pretrained English model "en_core_web_sm":
 
     python -m spacy download en_core_web_sm
 
+If you want to run the other models (bert|gpt|tfxl) from bert.py:
+* [allennlp]() == v1.3.0
+* [transformers]() == v3.0.0
+
+This is much more limited at the moment so it may have to be tweaked (and may crash in non-use cases)
+
 
 ### Quick Usage
 To run norming on stimuli:
@@ -106,14 +112,15 @@ To run norm.py with non-default settings:
     usage: norm.py [-h] [--exp EXP] [--models MODELS] [--vocab_file VOCAB_FILE]
                    [--has_header] [--multi_sent] [--avg] [--filter FILTER]
                    [--stim_file STIM_FILE] [--output_file OUTPUT_FILE]
-                   [--file_type FILE_TYPE]
+                   [--file_type FILE_TYPE] [--cell_type CELL_TYPE] [--layer LAYER]
 
     Experiment Stimuli Norming for LSTM Language Model Probing
 
     optional arguments:
       -h, --help            show this help message and exit
       --exp EXP             experiment type [IT|RSA|ADAPT|RSA-ADAPT|UNK]
-      --models MODELS       model to run [a|b|c|d|e|all|big|web|bert]
+      --models MODELS       model to run
+                            [a|b|c|d|e|all|big|web|bert|shuffled|elmo|gpt|tfxl]
       --vocab_file VOCAB_FILE
                             vocab file
       --has_header          Specify if the excel file has a header
@@ -127,8 +134,10 @@ To run norm.py with non-default settings:
       --output_file OUTPUT_FILE
                             Ouput file name: default is normed_[stim_file_name]
       --file_type FILE_TYPE
-                            File type for output: [xlsx|csv|both]
-
+                            File type for output: [xlsx|csv|both|dill|cell]
+      --cell_type CELL_TYPE
+                            measure to output for the cell file type
+      --layer LAYER         layer to get similarity at (for BERT, GPT2, TFXL)
 
 Example run:
         
@@ -174,5 +183,11 @@ csv files, which are saved in vocab_info as noun_vocab_freq.csv and verb_vocab_f
 Included in main is a function adapt, which takes sentences from an excel file and one-shot
 learns each sentence, returning surprisals before and after learning and the difference at
 the target.
+
+## Other Run Options
+The file\_type dill will save the output as a binary file which can be used later (saved as instance of Stim class in data.py). The 
+file\_type cell will save the output as stimuli sentence X model measure with the measure being specified with the cell\_type flag (use 
+case is sim, but should work for ent, surp, red\_ent). Running non-lstm models (bert|gpt|tfxl|elmo) goes through bert.py (only 
+validated for RSA experiments).
 
 ### References

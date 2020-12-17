@@ -107,6 +107,20 @@ class Measures:
         out_str = ','.join(out)
         print(out_str)
 
+    def return_measure(self, model_files, measure):
+
+        out = [self.word]
+
+        for model in model_files:
+            if measure == 'sim':
+                out.append(self.sims[model])
+            elif measure == 'surp':
+                out.append(self.surps[model])
+            elif measure == 'ent':
+                out.append(self.ents[model])
+        return out
+
+
     def return_data(self, model_files, only_avg=False): 
         out = [self.word]
 
@@ -155,11 +169,12 @@ class Measures:
 class Stim:
 
     def __init__(self, sent_file, hasHeader=False, filter_file=None, 
-            vocab_f='models/vocab'):
+            vocab_f=None):
 
         #Read in stimuli
         self.EXP, self.header = read_stim_file(sent_file, hasHeader)
         #Read in vocab
+        print(vocab_f)
         self.model_vocab = self.load_vocab(vocab_f)
         #Pairs of sentences
         self.SENTS = []
@@ -180,6 +195,7 @@ class Stim:
         self.load_words(filter_file)
 
         self.dataframe = None
+        self.cell_dataframe = None
 
     def save_excel(self, fname, model_files, only_avg=False, hasSim=False):
 
@@ -197,6 +213,13 @@ class Stim:
 
         self.dataframe.to_csv(fname, index=False)
 
+    def save_cell(self, fname, model_files, measure, measure_pos=-1):
+
+        fname = fname.split('.')[0] + '.xlsx'
+
+        self.create_cell_df(model_files, measure, measure_pos)
+
+        self.cell_dataframe.to_excel(fname, index=False)
 
     def check_unks(self):
 
@@ -220,6 +243,115 @@ class Stim:
             data.append(row)
 
         self.dataframe = pd.DataFrame(data, columns = header) 
+
+    def create_flat_out(self, model_files, measure, measure_pos=-1):
+
+        #create header
+        header = ['item']
+
+        hasSim = False
+        if measure == 'sim':
+            hasSim = True
+
+        for x in range(len(self.SENTS[0])):
+            header.append('SENTS_'+str(x))
+        for x in range(len(self.SENTS[0])):
+            header.append('UNK_SENTS_'+str(x))
+        for x in range(len(self.SENTS[0])):
+            header.append('has_UNK_'+str(x))
+
+        header.append('MODEL')
+        header.append(measure)
+
+        out_str = ','.join(header)+'\n'
+
+        #loop over stimuli
+        item = 0
+        for x in range(self.TABLES[0].shape[0]):
+
+            if x!=0 and x%2 == 0:
+                item += 1
+
+            row = [item]
+
+            row += self.SENTS[x]
+            row += self.UNK_SENTS[x]
+            row += self.hasUNK[x]
+
+            table = self.TABLES[measure_pos]
+
+            return_value = []
+            #for each word grab the measure
+            for z in range(table.shape[1]):
+                entry = table[x,z]
+                try:
+                    values = entry.return_measure(model_files, measure)
+                    if values[0] == '.':
+                        continue
+                    return_value = values
+                except:
+                    break
+
+            #skip over word
+            return_value = return_value[1:]
+            for i, model in enumerate(model_files):
+                temp = ','.join(list(map(lambda x: str(x), row)))
+                temp += ','+str(i)+','+str(return_value[i]) +'\n'
+
+                out_str += temp
+        return out_str
+                
+    def create_cell_df(self, model_files, measure, measure_pos=-1):
+
+        #create header
+        header = []
+
+        for x in range(len(self.SENTS[0])):
+            header.append('SENTS_'+str(x))
+        for x in range(len(self.SENTS[0])):
+            header.append('UNK_SENTS_'+str(x))
+        for x in range(len(self.SENTS[0])):
+            header.append('has_UNK_'+str(x))
+
+        for x in range(len(model_files)):
+            header.append('Network '+str(x+1)+ ' '+measure)
+
+        #loop over stimuli
+        data = []
+        for x in range(self.TABLES[0].shape[0]):
+            row = []
+
+            row += self.SENTS[x]
+            row += self.UNK_SENTS[x]
+            row += self.hasUNK[x]
+
+            table = self.TABLES[measure_pos]
+
+            return_value = []
+            all_values = []
+            #for each word grab the measure
+            for z in range(table.shape[1]):
+                entry = table[x,z]
+                try:
+                    values = entry.return_measure(model_files, measure)
+                    if values[0] == '.':
+                        continue
+                    return_value = values
+                    all_values.append(values)
+                except:
+                    break
+
+            #Get penultimate
+            '''
+            if len(all_values) > 2:
+                return_value = all_values[-2]
+            '''
+            #skip over word
+            row += return_value[1:]
+
+            data.append(row)
+
+        self.cell_dataframe = pd.DataFrame(data, columns = header) 
 
     def create_df(self, model_files, only_avg=False, hasSim=False):
 
@@ -353,7 +485,10 @@ class Stim:
             if not values[z]:
                 continue
             t_sent = ' '.join(list(map(lambda x: x[0], values[z])))
-            assert og_sent == t_sent
+            try:
+                assert og_sent == t_sent
+            except:
+                assert self.SENTS[item_idx][z] == t_sent
 
         #add to tables
         for x in range(len(self.TABLES)):

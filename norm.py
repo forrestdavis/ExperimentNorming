@@ -1,5 +1,6 @@
 from main import *
 import argparse
+import dill
 
 parser = argparse.ArgumentParser(description='Experiment Stimuli Norming for LSTM Language Model Probing')
 
@@ -7,7 +8,7 @@ parser.add_argument('--exp', type=str, default='IT',
                     help='experiment type [IT|RSA|ADAPT|RSA-ADAPT|UNK]')
 
 parser.add_argument('--models', type=str, default='a',
-                    help='model to run [a|b|c|d|e|all|big|web|bert]')
+                    help='model to run [a|b|c|d|e|all|big|web|bert|shuffled|elmo|gpt|tfxl]')
 
 parser.add_argument('--vocab_file', type=str, default='models/vocab',
                     help='vocab file')
@@ -35,7 +36,15 @@ parser.add_argument('--output_file', type=str,
 
 parser.add_argument('--file_type', type=str, 
         default='both', 
-        help='File type for output: [xlsx|csv|both]')
+        help='File type for output: [xlsx|csv|both|dill|cell]')
+
+parser.add_argument('--cell_type', type=str, 
+        default='sim', 
+        help='measure to output for the cell file type')
+
+parser.add_argument('--layer', type=int, 
+        default=0, 
+        help='layer to get similarity at (for BERT, GPT2, TFXL)')
 
 args = parser.parse_args()
 
@@ -66,6 +75,24 @@ elif args.models == 'web':
 elif args.models == 'bert':
     model_files = ['bert-uncased']
     args.vocab_file = 'bert_vocab'
+
+#dummy
+elif args.models == 'elmo':
+    model_files = ['elmo']
+    args.vocab_file = 'elmo'
+
+elif args.models == 'gpt':
+    model_files = ['gpt2']
+    args.vocab_file = 'gpt2'
+
+elif args.models == 'tfxl':
+    model_files = ['tfxl']
+    args.vocab_file = 'tfxl'
+
+elif args.models == 'shuffled':
+    model_files = glob.glob('./shuffled_models/*.pt')
+    #args.vocab_file = './shuffled_models/glove.num_unk.vocab'
+    args.vocab_file = './large_models/wikitext103_vocab'
 
 else:
     model_files = glob.glob('./models/*.pt')
@@ -108,8 +135,16 @@ if args.exp == 'IT':
 elif args.exp == 'RSA':
     if args.models == 'bert':
         import bert
-        layer = 11
-        EXP = bert.run_BERT_RSA(args.stim_file, layer, args.has_header)
+        EXP = bert.run_BERT_RSA(args.stim_file, args.layer, args.has_header)
+    elif args.models == 'elmo':
+        import bert
+        EXP = bert.run_ELMo_RSA(args.stim_file, args.has_header)
+    elif args.models == 'gpt':
+        import bert
+        EXP = bert.run_GPT_RSA(args.stim_file, args.layer, args.has_header)
+    elif args.models == 'tfxl':
+        import bert
+        EXP = bert.run_TFXL_RSA(args.stim_file, args.layer, args.has_header)
     else:
         EXP = run_RSA(args.stim_file, args.vocab_file, model_files, args.has_header, 
                 args.multi_sent, args.filter, verbose)
@@ -135,3 +170,7 @@ if args.exp == 'IT' or args.exp == 'RSA' or args.exp == "UNK":
         EXP.save_csv(output_file, model_files, args.avg, hasSim)
     elif args.file_type == 'xlsx':
         EXP.save_excel(output_file, model_files, args.avg, hasSim)
+    elif args.file_type == 'dill':
+        dill.dump(EXP, file = open(output_file+'.pkl', 'wb'))
+    elif args.file_type == 'cell':
+        EXP.save_cell(output_file, model_files, args.cell_type)
