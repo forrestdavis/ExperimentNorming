@@ -17,8 +17,8 @@ From spaCy you need the pretrained English model "en_core_web_sm":
     python -m spacy download en_core_web_sm
 
 If you want to run the other models (bert|gpt|tfxl) from bert.py:
-* [allennlp]() == v1.3.0
-* [transformers]() == v3.0.0
+* [allennlp](https://allennlp.org/) == v1.3.0
+* [transformers](https://github.com/huggingface/transformers) == v3.0.0
 
 This is much more limited at the moment so it may have to be tweaked (and may crash in non-use cases)
 
