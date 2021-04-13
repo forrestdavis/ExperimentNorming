@@ -3,7 +3,8 @@
 
 remove_items = set([])
 
-with open('yanina_flat_results.csv', 'r') as f:
+#with open('yanina_flat_results.csv', 'r') as f:
+with open('combined_flat_results.csv', 'r') as f:
 
     out_str = f.readline()
 
@@ -18,7 +19,8 @@ with open('yanina_flat_results.csv', 'r') as f:
         line = ','.join(line) + '\n'
         out_str += line
 
-with open('yanina_flat_results.csv', 'w') as f:
+#with open('yanina_flat_results.csv', 'w') as f:
+with open('combined_flat_results.csv', 'w') as f:
 
     f.write(out_str)
         

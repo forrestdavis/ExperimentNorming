@@ -22,6 +22,9 @@ parser.add_argument('--multi_sent', action='store_true',
 parser.add_argument('--avg', action='store_true', 
                     help='Specify if you want to return only average measures')
 
+parser.add_argument('--embedding', action='store_true',
+                    help='Specify if you want similarity to embeddings (only for RSA)')
+
 parser.add_argument('--filter', type=str, 
         default=None, 
         help='Specify name of file to words to filter from results (only for IT|RSA)')
@@ -44,7 +47,11 @@ parser.add_argument('--cell_type', type=str,
 
 parser.add_argument('--layer', type=int, 
         default=0, 
-        help='layer to get similarity at (for BERT, GPT2, TFXL)')
+        help='layer to get measure at (BERT|GPT|TFXL)')
+
+parser.add_argument('--measure_pos', type=int, 
+        default=-1, 
+        help='which sentence (from left) to query (-1, -2, etc)')
 
 args = parser.parse_args()
 
@@ -147,7 +154,7 @@ elif args.exp == 'RSA':
         EXP = bert.run_TFXL_RSA(args.stim_file, args.layer, args.has_header)
     else:
         EXP = run_RSA(args.stim_file, args.vocab_file, model_files, args.has_header, 
-                args.multi_sent, args.filter, verbose)
+                args.multi_sent, args.filter, verbose, args.embedding)
 
 elif args.exp == 'ADAPT':
     run_adapt(args.stim_file, args.vocab_file, model_files, output_file, args.has_header, 
@@ -173,4 +180,4 @@ if args.exp == 'IT' or args.exp == 'RSA' or args.exp == "UNK":
     elif args.file_type == 'dill':
         dill.dump(EXP, file = open(output_file+'.pkl', 'wb'))
     elif args.file_type == 'cell':
-        EXP.save_cell(output_file, model_files, args.cell_type)
+        EXP.save_cell(output_file, model_files, args.cell_type, args.measure_pos)

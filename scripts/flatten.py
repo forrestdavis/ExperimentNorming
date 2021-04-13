@@ -1,7 +1,8 @@
 
 targets = []
 
-with open('yanina_full_targets.csv', 'r') as f:
+#with open('yanina_full_targets.csv', 'r') as f:
+with open('combined_targets.csv', 'r') as f:
 
     header = f.readline().strip().split(',')
 
@@ -11,7 +12,8 @@ with open('yanina_full_targets.csv', 'r') as f:
         targets.append(line)
 
 ratings = []
-with open('yanina_flat_ratings.csv', 'r') as f:
+#with open('yanina_flat_ratings.csv', 'r') as f:
+with open('combined_ratings.csv', 'r') as f:
     header = f.readline()
 
     for line in f:
@@ -20,9 +22,9 @@ with open('yanina_flat_ratings.csv', 'r') as f:
         ratings.append(line)
 
 
-
-
-new_header = ['item', 'sent', 'hasUNK', 'rating', 'cond', 'model', 'verb_surp', 'verb_sim', 
+#new_header = ['item', 'sent', 'hasUNK', 'rating', 'cond', 'model', 'verb_surp', 'verb_sim', 
+#        'noun_surp', 'noun_sim'] 
+new_header = ['item', 'sent', 'hasUNK', 'rating', 'model', 'verb_surp', 'verb_sim', 
         'noun_surp', 'noun_sim'] 
 
 exclude_items = set([])
@@ -31,7 +33,8 @@ count = 0
 out_str = ','.join(new_header)+'\n'
 
 models = []
-with open('results/normed_yanina_full.csv', 'r') as data:
+#with open('results/normed_yanina_full.csv', 'r') as data:
+with open('results/combined_results.csv', 'r') as data:
 
 
 
@@ -55,7 +58,8 @@ with open('results/normed_yanina_full.csv', 'r') as data:
         ts = targets[count]
 
         y = 6
-        repeat = [item, sent, hasUNK, ratings[count][0], ratings[count][1]]
+        #repeat = [item, sent, hasUNK, ratings[count][0], ratings[count][1]]
+        repeat = [item, sent, hasUNK, ratings[count][0]]
         verb_surp = [-1]*len(models)
         verb_sim = [-1]*len(models)
         noun_surp = [-1]*len(models)
@@ -101,5 +105,6 @@ with open('results/normed_yanina_full.csv', 'r') as data:
             out_str += ','.join(data) + '\n'
 
 
-with open('yanina_flat_results.csv', 'w') as o:
+#with open('yanina_flat_results.csv', 'w') as o:
+with open('combined_flat_results.csv', 'w') as o:
     o.write(out_str)

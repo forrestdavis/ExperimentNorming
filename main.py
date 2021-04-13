@@ -21,9 +21,9 @@ import numpy as np
 import pandas as pd
 
 #set device to cpu if working on laptop :)
-#device = torch.device('cpu')
+device = torch.device('cpu')
 #set device to cpu if working on desktop :))))
-device = torch.device("cuda:0")
+#device = torch.device("cuda:0")
 
 #set loss function to be cross entropy
 criterion = nn.CrossEntropyLoss()
@@ -121,7 +121,7 @@ def test_IT(data_source, corpus, model):
         values.append(metrics)
     return values
 
-def get_sims(target_ids, sent_ids, corpus, model):
+def get_sims(target_ids, sent_ids, corpus, model, embedding=False):
 
     #cancel dropout
     model.eval()
@@ -139,7 +139,10 @@ def get_sims(target_ids, sent_ids, corpus, model):
 
     #hidden[0] is hidden; hidden[1] is cell state
     hidden = hidden[0].data
-    layer_1_target = hidden[-1].cpu().squeeze()
+    if not embedding:
+        layer_1_target = hidden[-1].cpu().squeeze()
+    else:
+        layer_1_target = model.encoder(target_ids[-2])
 
     SIMS = []
     
@@ -165,7 +168,10 @@ def get_sims(target_ids, sent_ids, corpus, model):
                 continue
 
             h = hidden[0].data
-            layer_1 = h[1].cpu().squeeze()
+            if not embedding:
+                layer_1 = h[1].cpu().squeeze()
+            else:
+                layer_1 = model.encoder(torch.tensor(word_input)).to(device).squeeze()
 
             #sim = np.corrcoef(layer_1_target, layer_1)[0, 1]
             cos_sim = nn.CosineSimilarity(dim=0)
@@ -246,6 +252,7 @@ def load_model(model_file):
             output, hidden = model(data, hidden)
         #Problem with diff versions of torch
         except:
+            sys.exit(1)
             try:
                 new_model = m.RNNModel('LSTM', 28439, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
                 new_model.load_state_dict(model.state_dict())
@@ -625,7 +632,7 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
     criterion = nn.CrossEntropyLoss()
 
     #Load experiments
-    EXP = data.Stim(stim_file, header, filter_file)
+    EXP = data.Stim(stim_file, header, filter_file, vocab_file)
 
     #Loop through the models
     for model_file in model_files:
@@ -685,7 +692,8 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
     return EXP
 
 def run_RSA(stim_file, vocab_file, model_files, header=False, 
-        multisent_flag = False, filter_file = None, verbose=False):
+        multisent_flag = False, filter_file = None, verbose=False, 
+        embedding=False):
 
     ''' Given a stimuli file, model vocabulary file and model files
     return information about information
@@ -712,36 +720,9 @@ def run_RSA(stim_file, vocab_file, model_files, header=False,
             model = torch.load(f, map_location='cpu')
 
             # make in continous chunk of memory for speed
-            '''
             if isinstance(model, torch.nn.DataParallel):
                 model = model.module
             model.rnn.flatten_parameters()
-            '''
-
-            #Check we have the correct version
-            try:
-                hidden = model.init_hidden(1)
-
-                test_data = torch.tensor([0]).unsqueeze(0)
-
-                output, hidden = model(data, hidden)
-            #Problem with diff versions of torch
-            except:
-                try:
-                    new_model = m.RNNModel('LSTM', 28439, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                    new_model.load_state_dict(model.state_dict())
-                    model = new_model
-                except:
-                    try:
-                        new_model = m.RNNModel('LSTM', 50002, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                        new_model.load_state_dict(model.state_dict())
-                        model = new_model
-                    #dumb me kept <num> in vocab *sigh*
-                    except:
-                        new_model = m.RNNModel('LSTM', 50003, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                        new_model.load_state_dict(model.state_dict())
-                        model = new_model
-
 
         model.eval()
         #loop through experimental items for EXP
@@ -763,7 +744,7 @@ def run_RSA(stim_file, vocab_file, model_files, header=False,
             #Get one hots
             sent_ids = corpus.get_data()
 
-            sims = get_sims(target_ids, sent_ids, corpus, model)
+            sims = get_sims(target_ids, sent_ids, corpus, model, embedding)
 
             values = test_IT(sent_ids, corpus, model)
 

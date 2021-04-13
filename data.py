@@ -336,12 +336,16 @@ class Stim:
                     values = entry.return_measure(model_files, measure)
                     if values[0] == '.':
                         continue
+                    #remove!
+                    if values[1] == 0:
+                        continue
                     return_value = values
                     all_values.append(values)
                 except:
                     break
 
-            #Get penultimate
+            #For running ent script
+            #   Get penultimate
             '''
             if len(all_values) > 2:
                 return_value = all_values[-2]
