@@ -1,6 +1,11 @@
 from main import *
 import argparse
-import dill
+
+try:
+    import dill
+    hasDill = 1
+except:
+    hasDill = 0
 
 parser = argparse.ArgumentParser(description='Experiment Stimuli Norming for LSTM Language Model Probing')
 
@@ -178,6 +183,7 @@ if args.exp == 'IT' or args.exp == 'RSA' or args.exp == "UNK":
     elif args.file_type == 'xlsx':
         EXP.save_excel(output_file, model_files, args.avg, hasSim)
     elif args.file_type == 'dill':
-        dill.dump(EXP, file = open(output_file+'.pkl', 'wb'))
+        if hasDill:
+            dill.dump(EXP, file = open(output_file+'.pkl', 'wb'))
     elif args.file_type == 'cell':
         EXP.save_cell(output_file, model_files, args.cell_type, args.measure_pos)
