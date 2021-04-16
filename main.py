@@ -236,39 +236,6 @@ def load_model(model_file):
         #run on local cpu for now
         model = torch.load(f, map_location='cpu')
 
-        # make in continous chunk of memory for speed
-        '''
-        if isinstance(model, torch.nn.DataParallel):
-            model = model.module
-        model.rnn.flatten_parameters()
-        '''
-
-        #Check we have the correct version
-        try:
-            hidden = model.init_hidden(1)
-
-            test_data = torch.tensor([0]).unsqueeze(0)
-
-            output, hidden = model(data, hidden)
-        #Problem with diff versions of torch
-        except:
-            sys.exit(1)
-            try:
-                new_model = m.RNNModel('LSTM', 28439, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                new_model.load_state_dict(model.state_dict())
-                model = new_model
-            except:
-                try: 
-                    new_model = m.RNNModel('LSTM', 50002, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                    new_model.load_state_dict(model.state_dict())
-                    model = new_model
-
-                #dumb me kept <num> in vocab *sigh*
-                except:
-                    new_model = m.RNNModel('LSTM', 50003, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                    new_model.load_state_dict(model.state_dict())
-                    model = new_model
-
     model.eval()
     return model
 
@@ -643,39 +610,6 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
         with open(model_file, 'rb') as f:
             #run on local cpu for now
             model = torch.load(f, map_location='cpu')
-
-            # make in continous chunk of memory for speed
-            '''
-            if isinstance(model, torch.nn.DataParallel):
-                model = model.module
-            model.rnn.flatten_parameters()
-            '''
-
-            '''
-            #Check we have the correct version
-            try:
-                hidden = model.init_hidden(1)
-
-                test_data = torch.tensor([0]).unsqueeze(0)
-
-                output, hidden = model(data, hidden)
-            #Problem with diff versions of torch
-            except:
-                try:
-                    new_model = m.RNNModel('LSTM', 28439, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                    new_model.load_state_dict(model.state_dict())
-                    model = new_model
-                except:
-                    try:
-                        new_model = m.RNNModel('LSTM', 50002, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                        new_model.load_state_dict(model.state_dict())
-                        model = new_model
-                    #dumb me kept <num> in vocab *sigh*
-                    except:
-                        new_model = m.RNNModel('LSTM', 50003, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
-                        new_model.load_state_dict(model.state_dict())
-                        model = new_model
-            '''
 
         #loop through experimental items for EXP
         for x in range(len(EXP.UNK_SENTS)):
