@@ -651,6 +651,7 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
             model.rnn.flatten_parameters()
             '''
 
+            '''
             #Check we have the correct version
             try:
                 hidden = model.init_hidden(1)
@@ -674,6 +675,7 @@ def run_norming(stim_file, vocab_file, model_files, header=False,
                         new_model = m.RNNModel('LSTM', 50003, 400, 400, 2, None, 0.2, tie_weights=True).to(device)
                         new_model.load_state_dict(model.state_dict())
                         model = new_model
+            '''
 
         #loop through experimental items for EXP
         for x in range(len(EXP.UNK_SENTS)):
