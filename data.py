@@ -199,14 +199,23 @@ class Stim:
 
     def save_excel(self, fname, model_files, only_avg=False, hasSim=False):
 
-        fname = fname.split('.')[0]+'.xlsx'
+        if '.' == fname[0]:
+            parts = fname.split('.')
+            fname = '.'.join(parts[:-1])+'.xlsx'
+        else:
+            fname = fname.split('.')[0] + '.xlsx'
 
         if self.dataframe is None:
             self.create_df(model_files, only_avg, hasSim)
         self.dataframe.to_excel(fname, index=False)
 
     def save_csv(self, fname, model_files, only_avg=False, hasSim=False):
-        fname = fname.split('.')[0]+'.csv'
+
+        if '.' == fname[0]:
+            parts = fname.split('.')
+            fname = '.'.join(parts[:-1])+'.csv'
+        else:
+            fname = fname.split('.')[0] + '.csv'
 
         if self.dataframe is None:
             self.create_df(model_files, only_avg, hasSim)

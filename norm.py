@@ -137,7 +137,8 @@ if args.output_file is '':
     else:
         output_file = 'results/normed_'+args.stim_file.split('/')[-1]
 else:
-    output_file = 'results/'+args.output_file
+    #output_file = 'results/'+args.output_file
+    output_file = args.output_file
 
 #Run experiment
 if args.exp == 'IT':
