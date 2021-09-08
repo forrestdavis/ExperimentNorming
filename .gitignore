@@ -2,3 +2,5 @@
 corpora
 __*
 large_models
+stimuli/*
+results/*

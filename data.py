@@ -143,6 +143,43 @@ class Measures:
                 out.append(self.sims[model])
         return out
 
+    def return_data_dict(self, model_files):
+        #get averages
+        if len(self.surps) == 0:
+            avg_surp = -1
+        else:
+            avg_surp = sum(self.surps.values())/len(self.surps.values())
+        if len(self.ents) == 0:
+            avg_ent = -1
+        else:
+            avg_ent = sum(self.ents.values())/len(self.ents.values())
+        if len(self.red_ents) == 0:
+            avg_red_ent = -1
+        else:
+            avg_red_ent = sum(self.red_ents.values())/len(self.red_ents.values())
+        if len(self.sims) == 0:
+            avg_sim = -1
+        else:
+            avg_sim = sum(self.sims.values())/len(self.sims.values())
+
+        #models X measures
+        data_dict = {}
+        for model in model_files:
+            data_dict[model] = {}
+            data_dict[model]['word'] = self.word
+            data_dict[model]['surp'] = self.surps.get(model, -1)
+            data_dict[model]['ent'] = self.ents.get(model, -1)
+            data_dict[model]['red_ent'] = self.red_ents.get(model, -1)
+            data_dict[model]['sim'] = self.sims.get(model, -1)
+
+            data_dict[model]['surp_avg'] = avg_surp
+            data_dict[model]['ent_avg'] = avg_ent
+            data_dict[model]['red_ent_avg'] = avg_red_ent
+            data_dict[model]['sim_avg'] = avg_sim
+
+        return data_dict
+
+
     def return_blank(self, model_files, only_avg=False, hasSim=False):
 
         out = ['NULL']
@@ -196,6 +233,104 @@ class Stim:
 
         self.dataframe = None
         self.cell_dataframe = None
+
+    def save_plot(self, fname, model_files, hasSim=False, plot_dict=None):
+        self.create_flat_df(model_files, hasSim)
+
+        if '.' in fname[0]:
+            parts = fname.split('.')
+            source_fname = '.'.join(parts[:-1])+'_source.xlsx'
+            plot_fname = '.'.join(parts[:-1])+'.png'
+        else:
+            source_fname = fname.split('.')[0]+'_source.xlsx'
+            plot_fname = fname.split('.')[0]+'.png'
+
+        
+        self.dataframe.to_excel(source_fname, index=False)
+
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=(20, 10))
+        sns.set(font_scale=1.3)
+
+        if plot_dict is not None:
+            regions = plot_dict['regions']
+        else:
+            regions = {1: [2, 3, 5], 
+                        2: [0, 3, 4, 5, 7], 
+                        3: [0, 3, 4, 5, 7]}
+
+        #filter dataframe
+        plot_data = self.dataframe.copy()
+
+        filter_info = None
+        for region in regions:
+            cur_filter = (plot_data['sentence_num'] == region) & (plot_data['word_num'].isin(regions[region]))
+            if filter_info is not None:
+                filter_info = filter_info | cur_filter
+            else:
+                filter_info = cur_filter
+
+        plot_data = plot_data[filter_info]
+
+        #Get percent data
+        percent_model_files = list(filter(lambda x: 'percent.pt' in x,
+                model_files))
+        if percent_model_files:
+            percent_model_files = list(map(lambda x: x.split('/')[-1].replace('.pt', ''), percent_model_files))
+            percent_plot_data = plot_data[plot_data['model'].isin(percent_model_files)]
+
+            if plot_dict and plot_dict['extra']['grand_avg']:
+                percent_plot = sns.lineplot(data=percent_plot_data, x='word_id', 
+                        y='sim', 
+                        marker="o")
+            else:
+                percent_plot = sns.lineplot(data=percent_plot_data, x='word_id', 
+                        y='sim', 
+                        hue='model',
+                        marker="o")
+
+            x_axis_words = plot_data[(plot_data['item'] == 0) & (plot_data['model'] == model_files[0].split('/')[-1].replace('.pt', ''))]['word'].tolist()
+
+            percent_plot.set_xticklabels(x_axis_words)
+            percent_plot.set_xlabel('')
+            percent_plot.set_ylabel('Similarity to Baseline')
+            plt.ylim(0, 1.5)
+
+            plt.savefig(plot_fname.replace('.png', '_percents.png'), dpi=300)
+            #plt.show()
+
+        #Get epochs data
+        epoch_model_files = list(filter(lambda x: 'percent.pt' not in x,
+                model_files))
+        if epoch_model_files:
+
+            #set some variables
+            plt.figure(figsize=(20, 10))
+            sns.set(font_scale=1.3)
+
+            epoch_model_files = list(map(lambda x: x.split('/')[-1].replace('.pt', ''), epoch_model_files))
+            epoch_plot_data = plot_data[plot_data['model'].isin(epoch_model_files)]
+
+            if plot_dict and plot_dict['extra']['grand_avg']:
+                epoch_plot = sns.lineplot(data=epoch_plot_data, x='word_id', 
+                        y='sim', 
+                        marker="o")
+            else:
+                epoch_plot = sns.lineplot(data=epoch_plot_data, x='word_id', 
+                        y='sim', 
+                        hue='model',
+                        marker="o")
+
+            x_axis_words = plot_data[(plot_data['item'] == 0) & (plot_data['model'] == model_files[0].split('/')[-1].replace('.pt', ''))]['word'].tolist()
+
+            epoch_plot.set_xticklabels(x_axis_words)
+            epoch_plot.set_xlabel('')
+            epoch_plot.set_ylabel('Similarity to Baseline')
+            plt.ylim(0, 1.5)
+
+            plt.savefig(plot_fname.replace('.png', '_epochs.png'), dpi=300)
+            #plt.show()
 
     def save_excel(self, fname, model_files, only_avg=False, hasSim=False):
 
@@ -432,6 +567,70 @@ class Stim:
             data.append(row)
 
         self.dataframe = pd.DataFrame(data, columns = header) 
+
+    def create_flat_df(self, model_files, hasSim=False):
+        if hasSim:
+            data = {'item': [], 'baseline': [], 'unk_baseline': [], 
+                    'sentence': [], 
+                    'unk_sentence': [], 'hasUNK': [], 'model': [], 
+                    'sentence_num': [], 'word': [], 'word_num': [], 
+                    'word_id': [],
+                    'surp': [], 'ent': [], 'red_ent': [], 'sim': [],
+                    'surp_avg': [], 'ent_avg': [], 'red_ent_avg': [],
+                    'sim_avg': []}
+        else:
+            data = {'item': [], 'sentence': [], 
+                    'unk_sentence': [], 'hasUNK': [], 'model': [], 
+                    'sentence_num': [], 'word': [], 'word_num': [], 
+                    'word_id': [], 
+                    'surp': [], 'ent': [], 'red_ent': [],
+                    'surp_avg': [], 'ent_avg': [], 'red_ent_avg': []}
+
+        #loop over stimuli
+        for item_idx in range(self.TABLES[0].shape[0]):
+            #loop over sentences in stimulus
+            for sent_idx in range(len(self.SENTS[item_idx])):
+                if hasSim:
+                    if sent_idx == 0:
+                        continue
+                table = self.TABLES[sent_idx]
+                #loop over each word
+                for word_idx in range(table.shape[1]):
+                    entry = table[item_idx, word_idx]
+                    entry_data = entry.return_data_dict(model_files)
+
+                    skipWord = 0
+
+                    #Skip over this word, if it has no value
+                    for model in model_files:
+                        if entry_data[model]['surp'] == -1:
+                            skipWord = 1
+                        break
+                    if skipWord:
+                        break
+
+                    #populate data
+                    for model in model_files:
+
+                        data['item'].append(item_idx)
+                        if hasSim:
+                            data['baseline'].append(self.SENTS[item_idx][0])
+                            data['unk_baseline'].append(self.UNK_SENTS[item_idx][0])
+                        data['sentence'].append(self.SENTS[item_idx][sent_idx])
+                        data['unk_sentence'].append(self.UNK_SENTS[item_idx][sent_idx])
+                        data['hasUNK'].append(self.hasUNK[item_idx][sent_idx])
+
+                        data['model'].append(model.split('/')[-1].replace('.pt', ''))
+                        data['sentence_num'].append(sent_idx)
+                        data['word_num'].append(word_idx)
+
+                        word_id = str(sent_idx).zfill(2)+str(word_idx).zfill(2)
+                        data['word_id'].append(word_id)
+                        
+                        for key in entry_data[model]:
+                            data[key].append(entry_data[model][key])
+
+        self.dataframe = pd.DataFrame(data)
 
     def load_IT(self, model_name, item_idx, values, multisent_flag=False, sims=None):
 

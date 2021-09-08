@@ -44,7 +44,7 @@ parser.add_argument('--output_file', type=str,
 
 parser.add_argument('--file_type', type=str, 
         default='both', 
-        help='File type for output: [xlsx|csv|both|dill|cell]')
+        help='File type for output: [xlsx|csv|both|dill|cell|plot]')
 
 parser.add_argument('--cell_type', type=str, 
         default='sim', 
@@ -57,6 +57,19 @@ parser.add_argument('--layer', type=int,
 parser.add_argument('--measure_pos', type=int, 
         default=-1, 
         help='which sentence (from left) to query (-1, -2, etc)')
+
+parser.add_argument('--epoch_num', type=int, 
+        default=-1, 
+        help = 'which checkpoint epoch to use')
+parser.add_argument('--percent_num', type=int, 
+        default=-1, 
+        help = 'which checkpoint epoch to use')
+parser.add_argument('--seed_num', type=int, 
+        help = 'which seed_num to look for')
+
+parser.add_argument('--plot_config', type=str, 
+        default='',
+        help='Config file for plotting propagation dynamics')
 
 args = parser.parse_args()
 
@@ -82,6 +95,37 @@ if args.models == 'big':
 elif args.models == 'web':
     model_files = glob.glob('./web_models/*.pt')
     args.vocab_file = './web_models/openwebtext.vocab'
+
+elif args.models == 'checkpoint':
+
+    if args.plot_config:
+        import yaml
+        with open(args.plot_config, 'r') as f:
+            plot_dict = yaml.load(f)
+
+        model_files = []
+        for seed in plot_dict['seeds']:
+            seed_files = glob.glob('developing_models/'+str(seed)+'/*.pt')
+            if 'percents' in plot_dict['plots']:
+                for percent in plot_dict['plots']['percents']:
+                    model_files += list(filter(lambda x: '_'+str(percent)+'_percent.pt' in x, seed_files))
+            if 'epochs' in plot_dict['plots']:
+                for epoch in plot_dict['plots']['epochs']:
+                    model_files += list(filter(lambda x: 'checkpoint_'+str(epoch)+'.pt' in x, seed_files))
+        args.vocab_file = 'developing_models/wikitext_103_vocab'
+
+    else:
+        #model_files = glob.glob('iterative_models/*.pt')
+        model_files = glob.glob('/home/forrestdavis/Projects/private-neural-complexity/finegrained_checkpointing/*')
+        args.vocab_file = './iterative_models/wikitext_103_vocab'
+        #model_files = list(filter(lambda x: '_'+str(model_num)+'.pt' in x and 'seed23' in x, model_files))
+
+        model_files = list(filter(lambda x: 'seed'+str(args.seed_num)+'_' in x, model_files))
+
+        if args.percent_num != -1:
+            model_files = list(filter(lambda x: '_'+str(args.percent_num)+'_percent.pt' in x, model_files))
+        elif args.epoch_num != -1:
+            model_files = list(filter(lambda x: 'checkpoint_'+str(args.epoch_num)+'.pt' in x, model_files))
 
 #dummy
 elif args.models == 'bert':
@@ -129,13 +173,16 @@ if args.exp == 'IT':
 else:
     hasSim = True
 
-if args.output_file is '':
+if args.output_file == '':
+    output_file = 'percent_training_results/'+model_files[0].split('/')[-1].replace('.pt', '')
+    '''
     if args.avg:
         output_file = 'results/normed_avg_'+args.stim_file.split('/')[-1]
     elif args.exp == 'UNK':
         output_file = 'results/normed_UNKs_'+args.stim_file.split('/')[-1]
     else:
         output_file = 'results/normed_'+args.stim_file.split('/')[-1]
+    '''
 else:
     #output_file = 'results/'+args.output_file
     output_file = args.output_file
@@ -176,6 +223,7 @@ elif args.exp == 'UNK':
 #save output IT|RSA
 if args.exp == 'IT' or args.exp == 'RSA' or args.exp == "UNK":
 
+    print('saving to ', output_file+'.....')
     if args.file_type == 'both':
         EXP.save_excel(output_file, model_files, args.avg, hasSim)
         EXP.save_csv(output_file, model_files, args.avg, hasSim)
@@ -188,3 +236,12 @@ if args.exp == 'IT' or args.exp == 'RSA' or args.exp == "UNK":
             dill.dump(EXP, file = open(output_file+'.pkl', 'wb'))
     elif args.file_type == 'cell':
         EXP.save_cell(output_file, model_files, args.cell_type, args.measure_pos)
+    elif args.file_type == 'plot':
+        import yaml
+        if args.plot_config:
+            with open(args.plot_config, 'r') as f:
+                plot_dict = yaml.load(f)
+        else:
+            plot_dict = None
+        output_file = 'developing_results/'+args.stim_file.split('/')[-1]
+        EXP.save_plot(output_file, model_files, hasSim, plot_dict)
