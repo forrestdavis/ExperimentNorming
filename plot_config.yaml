@@ -17,16 +17,24 @@ regions:
         - 7
 
 seeds: 
-        - 1994
+        - 23
 
 plots: 
-#percents: 
+  #percents: 
+  #     - 10 
+  #      - 20 
+  #      - 30
+  #      - 40
+  #      - 80
+  #      - 90
+          #- 100
+        
         epochs: 
         - 1
-        - 10
-        - 20
-        - 30
-        - 40 
+          #- 10
+          #- 20
+          #- 30
+          #- 40 
 
 extra:
     grand_avg: False
